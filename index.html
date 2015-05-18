@@ -2,23 +2,8 @@
 <meta charset="utf-8">
 <head>
   <style>
-    .bar.drawn {
-      fill: steelblue;
-      opacity: 1;
-    }
-    
-    .tooltip.box {
-      fill: whitesmoke;
-      stroke: steelblue;
+    .tooltip.box, .tooltip.triangle {
       stroke-width: 2px;
-      // opacity: 0.9;
-    }
-    
-    .tooltip.triangle {
-      fill: steelblue;
-      stroke: steelblue;
-      stroke-width: 2px;
-      opacity: 0.9;
     }
     
     text.toolbar {
@@ -229,7 +214,7 @@
   </div>
   <script>
   "use strict";
-    console.time("Time for data loading");
+    // console.time("Time for data loading");
     var file;
     var data;
     var items;
@@ -248,18 +233,18 @@
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
-      outerWidth = 960,
-      outerHeight = 500,
-      innerWidth = outerWidth - margin.left - margin.right,
-      innerHeight = outerHeight - margin.top - margin.bottom,
-      width = innerWidth - padding.left - padding.right,
-      height = innerHeight - padding.top - padding.bottom;
-    
+      myOuterWidth = 960,
+      myOuterHeight = 500,
+      myInnerWidth = myOuterWidth - margin.left - margin.right,
+      myInnerHeight = myOuterHeight - margin.top - margin.bottom,
+      width = myInnerWidth - padding.left - padding.right,
+      myHeight = myInnerHeight - padding.top - padding.bottom;
+      
     var x = d3.scale.ordinal()
       .rangeRoundBands([0, width], .1);
 
     var y = d3.scale.linear()
-      .range([height, 0]);
+      .range([myHeight, 0]);
     
     var xAxis = d3.svg.axis()
       .scale(x)
@@ -272,8 +257,8 @@
     var chart = d3.select("body")
       .append("div").attr("class", "chart")
       .append("svg")
-      .attr("width", outerWidth)
-      .attr("height", outerHeight)
+      .attr("width", myOuterWidth)
+      .attr("height", myOuterHeight)
       .append("g")
       .attr("class", "margin")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -284,7 +269,7 @@
 
     drawingArea.append("g")
       .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")"); 
+      .attr("transform", "translate(0," + myHeight + ")"); 
      
     var controlPointY = 2 * (padding.bottom - 25) - 1;
     
@@ -296,7 +281,8 @@
       .y(function(d) { return d.y});      
     
     var getArcPositions = function (itemFrom, itemTo) {
-      return [{x: 0, y: 25}, {x: x(itemTo) - x(itemFrom), y: 0}];
+      return [{x: 0, y: 25}, 
+        {x: x(mapItemToItemShort(itemTo)) - x(mapItemToItemShort(itemFrom)), y: 0}];
     }
     
     var getArcMap = function (items) {
@@ -315,29 +301,10 @@
     }
     
     // 1.1. read data from file  
-    d3.csv("produktmix4b.csv", type, function(error, f) {
+    d3.csv("items.csv", type, function(error, f) {
         file = f;
-        items = d3.keys(file[0]).filter(function(key) { 
-            if (key.substring(0,1) === "_") {
-              // frequencyName = key.slice(1, key.length-1);
-              frequencyName = key;
-              return false;
-            }  
-            else { 
-              return true;
-            }
-          });
-        var itemParts;  
-        data = items.map(function(d, i){ 
-          itemParts = d.split(":");
-          console.log(itemParts[0]);
-          console.log("d: " +d);
-          return {item: d, itemShort: itemParts[0], itemLong: itemParts[itemParts.length-1], frequency: 0, index: i}});
-        
-        items = items.map( function(d,i) {
-          var itemPiece = d.split(":");
-          return itemPiece[0];
-        }); 
+        items = parseFirstColumn(file);
+
         x.domain(items);        
         d3.select(".x.axis").call(xAxis);
         render(true);
@@ -351,7 +318,85 @@
         }
       }    
       return d;
-    }    
+    }  
+    
+    // 1.3 helper (parse all parts of column name) for reading data from file
+    function parseFirstColumn(_file) {
+      var _items = d3.keys(_file[0]).filter(function(key) { 
+        if (key.substring(0,1) === "_") {
+          // frequencyName = key.slice(1, key.length);
+          frequencyName = key;
+          return false;
+        }  
+        else { 
+          return true;
+        }
+      });
+      
+      var itemParts; 
+      var itemObject;
+      data = _items.map(function(d, i){
+        itemObject = {
+          item: d, 
+          itemShort: d, 
+          itemLong: d,
+          color: "steelblue",  
+          frequency: 0, 
+          index: i,
+          group: 0
+        };
+        itemParts = d.split(":");
+        setItemProperties( itemObject, itemParts);         
+        return itemObject;
+      });
+
+      _items = _items.map( function(d,i) {
+        var itemPiece = d.split(":");
+        return itemPiece[0];
+        }); 
+      return _items;  
+    }
+    
+    // 1.4 helper for 1.3    
+    function setItemProperties(_itemObject, _itemTokens) {
+      _itemObject.itemLong = _itemTokens[0];
+      _itemObject.itemShort = _itemTokens[0];
+      _itemTokens.forEach( function (_token) {
+        switch (_token.substring(0,3)) {
+          case "CO=":
+            _itemObject.color = _token.slice(3);
+            if (_itemObject.color.substr(0, 3) === "rgb") {
+              _itemObject.color = _itemObject.color.replace(/ /g, ",");
+            }  
+            break;
+          case "LN=":
+            _itemObject.itemLong = _token.slice(3);
+            break;
+          case "GR=":
+            _itemObject.group = _token.slice(3);
+            break;  
+        }
+      });
+    }
+    
+    // 1.5 helper function to map between two different column representations
+    // _item: complete column name from file . @returns itemShort (just column name used for x axis)
+    function mapItemToItemShort (_item) {
+      return _item.split(":")[0];
+    }
+    
+    // 1.6 helper function to map between two different column representations (for div filter)
+    // _item: complete column name from file . @returns itemLong (long column name))
+    function mapItemToItemLong (_item) {
+      var _itemTokens = _item.split(":");
+      var _longName = _itemTokens[0];
+      _itemTokens.forEach( function (_token) {
+        if (_token.substring(0,3) === "LN=") {
+          _longName = _token.slice(3);
+        }
+      });
+      return _longName;
+    }
     
     // 2.1. setting up the main display
     function renderFirstTime() {
@@ -366,6 +411,7 @@
       .style("text-anchor", "end")
       .text(frequencyName.slice(1, frequencyName.length));
       
+      var bars = d3.selectAll(".x>.tick").data(data);
       var indicator = drawingArea.select(".x.axis").selectAll('g.tick')
         .append('g')
         .attr('class', 'indicator')
@@ -392,13 +438,14 @@
         .style("stroke-width", 2)
         .style("opacity", 0.5);
      
-      var bars = d3.selectAll(".x>.tick").data(data);
+      // var bars = d3.selectAll(".x>.tick").data(data);
       bars.append("rect")
         .attr("class", "bar drawn")
         .attr("x", -x.rangeBand()/2)
         .attr("width", x.rangeBand())
         .attr("y", 0)
-        .attr("height", 0);
+        .attr("height", 0)
+        .style("fill", function(d) { return d.color;});
       
       var selArea = drawingArea.selectAll("g.gtooltip")
         .data(data)
@@ -408,7 +455,7 @@
 
       selArea.attr("transform", function (d) {
           var trans = d3.selectAll(".x>.tick").filter( function (da) {return da === d;}).attr("transform");
-          trans = trans.split(",")[0] + "," + height + ")";
+          trans = trans.split(",")[0] + "," + myHeight + ")";
           return trans;
         });
       
@@ -416,13 +463,13 @@
       var tooltipWidth;
       
       selArea.append("rect")
-        .attr("class", "selection bar")
+        .attr("class", "selection bar unselect")
         .attr("x", -x.rangeBand()/2)
         .attr("width", x.rangeBand())
-        .attr("y", function(d) { return -(height - y(maxFrequencyOfInitialItems)); })
-        .attr("height", height + 20 - y(maxFrequencyOfInitialItems))
+        .attr("y", function(d) { return -(myHeight - y(maxFrequencyOfInitialItems)); })
+        .attr("height", myHeight + 20 - y(maxFrequencyOfInitialItems))
         .on("mouseover", function(d) {
-          var topY = -(height - y(d.frequency)) - tooltipHeight - 10;
+          var topY = -(myHeight - y(d.frequency)) - tooltipHeight - 10;
           var bottomY = topY + tooltipHeight +10;
           var sel = d3.selectAll("g.gtooltip").filter( function (da) {return da === d;});
           
@@ -517,8 +564,8 @@
       transition.select(".y.axis").call(yAxis);
         
       var transBars = transition.selectAll(".bar.drawn")
-        .attr("y", function(d) { return -(height - y(d.frequency)); })
-        .attr("height", function(d) { return height - y(d.frequency); });
+        .attr("y", function(d) { return -(myHeight - y(d.frequency)); })
+        .attr("height", function(d) { return myHeight - y(d.frequency); });
       if (reselectData && (document.getElementById('sort').checked))  
         transBars.each("end", sortItems);        
     }
@@ -541,8 +588,9 @@
       });
       
       if (!listOfAlternativeItemSets.empty()) { 
-        var retAlt = false;
+        var retAlt;
         listOfAlternativeItemSets.forEach( function (key, altItemSet) {
+          retAlt = false;
           altItemSet.forEach(function (item, condition) {
             if (r[item] === condition) {
               retAlt = true;
@@ -569,7 +617,7 @@
         if (alternativeItemSet.has(item)) {
           alternativeItemSet.remove(item);
           d3.selectAll(".indicator")
-            .filter(function (d) { return d === item;})
+            .filter(function (d) { return d.item === item;})
             .style("fill", "none")
             .style("opacity", 0);
         }
@@ -581,7 +629,7 @@
         if (alternativeItemSet.has(item)) {
           alternativeItemSet.remove(item);
           d3.selectAll(".indicator")
-            .filter(function (d) { return d === item;})
+            .filter(function (d) { return d.item === item;})
             .style("fill", "none")
             .style("opacity", 0);
         }
@@ -593,9 +641,9 @@
       drawArcs(false, altId + 1);      
 
       d3.selectAll(".indicator")
-        .each(function (d) { if (alternativeItemSet.has(d)) {
+        .each(function (d) { if (alternativeItemSet.has(d.item)) {
           d3.select(this).select(".colorIndicator").style("fill", 
-            function(d) { return (alternativeItemSet.get(d) === 1) ? "green": "red";})
+            function(d) { return (alternativeItemSet.get(d.item) === 1) ? "green": "red";})
             .style("opacity", 0.5); 
         }
       });
@@ -612,10 +660,10 @@
       d3.selectAll('.altIndicator').selectAll("path.line.altId"+(aId)).remove();     
       d3.selectAll('.altIndicator')
         .filter(function(d) {
-          return altArcMap.has(d);})
+          return altArcMap.has(d.item);})
         .append("path")
         .attr("class", function (d) { return "line altId"+(aId);})
-        .attr("d", function(d) {return altArc(altArcMap.get(d));})
+        .attr("d", function(d) {return altArc(altArcMap.get(d.item));})
         .style("opacity", 0.5)
         .style("stroke-width", function (d) { 
           return altSelectionFinished ? 3 : 2;})
@@ -693,9 +741,9 @@
         .text(function(d){ return formatNumber(d);});
       
       d3.selectAll(".colorIndicator")
-        .each(function (d) { if (selectedItemSet.has(d)) {
+        .each(function (d) { if (selectedItemSet.has(d.item)) {
           d3.select(this).style("fill", 
-            function(d) { return (selectedItemSet.get(d).condition === 1) ? "green": "red";})
+            function(d) { return (selectedItemSet.get(d.item).condition === 1) ? "green": "red";})
             .style("opacity", 0.5);
           }
           else {
@@ -717,10 +765,10 @@
       selectedItemSet.forEach(function(item, value) {
         if (value.alternativeId === 0) {
           if (value.condition === 1) {
-            itemText += "+"+ item + "\n";
+            itemText += "+"+ mapItemToItemLong(item) + "\n";
           }
           else {
-            itemText += "-"+ item + "\n";
+            itemText += "-"+ mapItemToItemLong(item) + "\n";
           }
         }
       });
@@ -729,10 +777,10 @@
         itemText += "(";
         aiMap.forEach(function(item, condition) {
           if (condition === 1) {
-            itemText += "+"+ item + " || ";
+            itemText += "+"+ mapItemToItemLong(item) + " || ";
           }
           else {
-            itemText += "-"+ item + " || ";
+            itemText += "-"+ mapItemToItemLong(item) + " || ";
           }
         });  
         itemText = itemText.substring(0, itemText.length-4); 
@@ -761,7 +809,7 @@
         x = x.domain(data.sort((sortByFreq)
           ? function(a, b) { return b.frequency - a.frequency; }
           : function(a, b) { return d3.ascending(a.index, b.index); })
-          .map(function(d) { return d.item; }));
+          .map(function(d) { return d.itemShort; }));
           
       var transition = drawingArea.transition().duration(750),
           delay = function(d, i) { return i * 50; };
@@ -769,10 +817,10 @@
       transition.selectAll(".x>.tick")
         .delay(delay)
         .attr("transform", function(d) {
-          return "translate(" + (x(d.item) + x.rangeBand()/2) + ",0)";
+          return "translate(" + (x(d.itemShort) + x.rangeBand()/2) + ",0)";
         });
       d3.selectAll(".gtooltip").attr("transform", function(d) {
-          return "translate(" + (x(d.item) + x.rangeBand()/2) + ", " + height +")";
+          return "translate(" + (x(d.itemShort) + x.rangeBand()/2) + ", " + myHeight +")";
         });
         
       listOfAlternativeItemSets.forEach(function(key, value) {
@@ -794,14 +842,15 @@
       // var altSelectionFinished = true;
       var smallArc = [{x: 0, y: 25}, {x: 0, y: 0}];
       altArcMap = getArcMap(altSelectionMap.keys());
-        
+      
       updateArcs = d3.selectAll(".altIndicator")
-        .data(altArcMap.keys(), function(d) {return d;});
+        .filter ( function(d) { return altArcMap.has(d.item); 
+        });
       
       updateArcs.selectAll("path.line.altId"+(itemKey)).transition().delay(delay2).duration(800) 
         .attr("d", function(d) {return altArc(smallArc);})
         .transition()
-        .attr("d", function(d) {return altArc(altArcMap.get(d));});  
+        .attr("d", function(d) {return altArc(altArcMap.get(d.item));});  
       
       updateArcs.filter(function() {
         return d3.select(this).select("path.line.altId"+(itemKey)).empty();
@@ -817,13 +866,16 @@
           return altSelectionFinished ? "" : "2,2";})
         .style("opacity", 0.5)
         .transition()
-        .attr("d", function(d) {return altArc(altArcMap.get(d));});
- 
-      updateArcs.exit().selectAll("path.line.altId"+(itemKey))
+        .attr("d", function(d) {return altArc(altArcMap.get(d.item));});
+       
+      updateArcs = d3.selectAll(".altIndicator")
+        .filter ( function(d) { return !altArcMap.has(d.item); 
+      });
+      updateArcs.selectAll("path.line.altId"+(itemKey))
       .style("opacity", 0.5)
       .transition().delay(delay2).duration(750)
       .style("opacity", 0)
-      .remove();   
+      .remove();      
     }
     
     //8.1. function 1 for computing frequent 2-item set
@@ -839,19 +891,55 @@
     
     //8.2. function 2 for computing frequent 2-item set
     function countFrequentItems(row) {
-        var keys = Object.keys(row);
-        var keyLength = keys.length;
+      var keys = Object.keys(row);
+      var keyLength = keys.length;
 
-        for (var i=1; i < keyLength; i++){
-          if (row[keys[i]] === 1) {
-            for (var j=i+1; j < keyLength; j++){
-              if (row[keys[j]] === 1) {
-                frequentItemOne[i-1][j-1] += row[keys[0]];
-              } 
-            }  
+      for (var i=1; i < keyLength; i++){
+        if (row[keys[i]] === 1) {
+          for (var j=i+1; j < keyLength; j++){
+            if (row[keys[j]] === 1) {
+              frequentItemOne[i-1][j-1] += row[keys[0]];
+            } 
+          }  
+        }
+      }
+    }
+      
+    //8.3. display TOP 3 frequent 2-item sets in table
+    function showPatterns() {
+      var patterns = [];
+      for (var p = 0; p < 3; p++) {
+          patterns[p] = { frequency: 0, itemOne: "None", itemTwo: "None"};
+        }
+      for (var i=0; i < frequentItemOne.length; i++){
+        if (selectedItemSet.has(data[i].item)) {
+            continue;
+          }
+        for (var j=i+1; j < frequentItemOne.length; j++){
+          if (selectedItemSet.has(data[j].item)) {
+            continue;
+          }
+          for (var p=0; p < patterns.length; p++) {
+            if (frequentItemOne[i][j] > patterns[p].frequency) {
+              patterns.splice(p, 0, {frequency: frequentItemOne[i][j], itemOne: data[i].itemShort, itemTwo: data[j].itemShort});
+              patterns.pop();
+              break;
+            }
           }
         }
       }
+
+      d3.selectAll("#patternTable tr.content").remove();
+      var format = d3.format(",.0f");
+      for (var p=0; p < patterns.length; p++) {
+          var tablePos = d3.select("#patternTable tbody").append("tr").attr("class", "content");
+          tablePos.append("td").text(patterns[p].itemOne);
+          tablePos.append("td").text(patterns[p].itemTwo);
+          tablePos.append("td").text(formatNumber((patterns[p].frequency)));
+          tablePos.append("td").text(
+            formatNumber(Number(patterns[p].frequency*100/initialFrequencyTotal).toFixed(1)+"%"));
+      }
+    }
     
     //9.1. display help rectangle after "mouseover" event
     function showHelp() {
@@ -876,7 +964,7 @@
         .transition().delay(delay).duration(400)
         .attr('x', 360)
         .attr('width', 400)
-        .attr('height', 180)
+        .attr('height', 200)
         .style("opacity", 0.9);
        
       var helpText = [];
@@ -886,7 +974,8 @@
       helpText[3] = "- exclude item OR: 'alt' + 'shift' + mouse click";
       helpText[4] = "To finish OR selections, select the last item without 'alt' ";
       helpText[6] = "Exploration table shows for the current selection";
-      helpText[7] = "the TOP 3 most frequent 2-item sets.";
+      helpText[7] = "the TOP 3 most frequent 2-item sets";
+      helpText[8] = "which don't contain the selected items.";
     
       helpText.forEach(function (element, index){
         drawingArea.append("text")
@@ -910,44 +999,8 @@
         .style("background", "lightgrey")
         .style("border", "1px solid darkgrey");
     }
-    
-    //10.1. display TOP 3 frequent 2-item sets in table
-    function showPatterns() {
-      var patterns = [];
-      for (var p = 0; p < 3; p++) {
-          patterns[p] = { frequency: 0, itemOne: "None", itemTwo: "None"};
-        }
-      for (var i=0; i < frequentItemOne.length; i++){
-        if (selectedItemSet.has(items[i])) {
-            continue;
-          }
-        for (var j=i+1; j < frequentItemOne.length; j++){
-          if (selectedItemSet.has(items[j])) {
-            continue;
-          }
-          for (var p=0; p < patterns.length; p++) {
-            if (frequentItemOne[i][j] > patterns[p].frequency) {
-              patterns.splice(p, 0, {frequency: frequentItemOne[i][j], itemOne: items[i], itemTwo: items[j]});
-              patterns.pop();
-              break;
-            }
-          }
-        }
-      }
-
-      d3.selectAll("#patternTable tr.content").remove();
-      var format = d3.format(",.0f");
-      for (var p=0; p < patterns.length; p++) {
-          var tablePos = d3.select("#patternTable tbody").append("tr").attr("class", "content");
-          tablePos.append("td").text(patterns[p].itemOne);
-          tablePos.append("td").text(patterns[p].itemTwo);
-          tablePos.append("td").text(formatNumber((patterns[p].frequency)));
-          tablePos.append("td").text(
-            formatNumber(Number(patterns[p].frequency*100/initialFrequencyTotal).toFixed(1)+"%"));
-      }
-    }
-    
-    //11.1. helper for displaying decimal point for frequency and percent with German convention
+       
+    //10.1. helper for displaying decimal point for frequency and percent with German convention
     function formatNumber(str) {
       if (+str % 1 !== 0)
         return str.split(".").join(",");
@@ -956,7 +1009,7 @@
       return newStr;
     }
     
-    //11.2. helper for create a light shade of a color - used for tooltip box background
+    //10.2. helper for create a light shade of a color - used for tooltip box background
     function lighterRGB(oldRGB) {
       oldRGB = oldRGB.substring(4, oldRGB.length-1);
       var newRGB = oldRGB.split(",");
