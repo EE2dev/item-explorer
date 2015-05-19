@@ -170,11 +170,11 @@
       display:none;
     }
   </style>
-  <script src="http://d3js.org/d3.v3.js"></script>
+  <script src="../d3/d3.js"></script>
 </head>
 <body>
 <pre id="data">
-_Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4,item5,item6,item7,item8,item9,item10,item11,item12,item13,item14,item15,item16,item17,item18,item19,item20
+_customers,item1:LN=very long name of item 1 ....,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12,item13,item14,item15,item16,item17,item18,item19,item20
 1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
 3,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
@@ -32948,7 +32948,7 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
       return arcs;
     }
     
-    //readData("items.csv");
+    // readData("items.csv");
     readData();
     
     // initial setup - called by readData()
@@ -32961,7 +32961,7 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
     
     // 1.1. read data from file  
     function readData(csvFile) {
-      if (typeof nameOfFile !== 'undefined') {
+      if (typeof csvFile !== 'undefined') {
         d3.csv(csvFile, type, function(error, f) {
           file = f;
           initialSetup();
@@ -33006,7 +33006,7 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
           item: d, 
           itemShort: d, 
           itemLong: d,
-          color: "steelblue",  
+          color: "rgb(70, 130, 180)",  
           frequency: 0, 
           index: i,
           group: 0
@@ -33121,7 +33121,12 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
 
       selArea.attr("transform", function (d) {
           var trans = d3.selectAll(".x>.tick").filter( function (da) {return da === d;}).attr("transform");
-          trans = trans.split(",")[0] + "," + myHeight + ")";
+          if (trans === trans.split(",")[0]) { // fix for IE
+          	trans = trans.substr(0, trans.length-1) + ", " + myHeight + ")";
+          }
+          else {
+          	trans = trans.split(",")[0] + ", " + myHeight + ")";
+          }
           return trans;
         });
       
@@ -33189,7 +33194,8 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
           else {
             updateSelection(d.item);
           }
-        });      
+        });   
+        makeUnselectableForOtherBrowsers();   
     }
     
     // 2.2. displaying bars for current selection
@@ -33216,7 +33222,7 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
         maxFrequencyOfInitialItems = d3.max(data, function(d) { return d.frequency; });
         renderFirstTime();
         firstTime = false;
-        console.timeEnd("Time for data loading");
+        // console.timeEnd("Time for data loading");
       }
       
       maxFrequencyOfCurrentItems = (document.getElementById('update_Axis').checked) ?
@@ -33234,6 +33240,18 @@ _Anzahl Kunden,item1:LN=verylongitemNameyaya,item2,item3:CO=rgb(200 100 7),item4
         .attr("height", function(d) { return myHeight - y(d.frequency); });
       if (reselectData && (document.getElementById('sort').checked))  
         transBars.each("end", sortItems);        
+    }
+    
+    // 2.3. shim for IE, Opera
+    function makeUnselectableForOtherBrowsers() {
+    	d3.selectAll(".x.axis g.tick>text").attr("unselectable", "on");
+    	d3.selectAll(".y.axis g.tick>text").attr("unselectable", "on");
+    	// above does not seem to work for shift + click
+    	window.onload = function() {
+			  document.onselectstart = function() {
+			    return false;
+			  }
+			}
     }
     
     // 3.1. check if record r satisfies all selection criteria
