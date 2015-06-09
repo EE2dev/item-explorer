@@ -12,9 +12,9 @@ The name after the underscore is displayed for the y axis.
 </p>
 <p>
 <h5>Column features</h5>
-Feature can be added in the first line of the csv file to the attributes.
-Multiple features per attribute are possible.
-
+Features can be added in the first line of the csv file to the attributes.
+Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon)
+<br>
 Example for first line of csv file with column features:
 _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3
 
