@@ -8,7 +8,7 @@ Supports column features.
 <h1>Format of the csv file</h1>
 <p>
 The attribute with the frequency has to be preceded with a "_"(underscore).
-The name aftre the underscore is displayed for the y axis.
+The name after the underscore is displayed for the y axis.
 </p>
 <p>
 <h3>Column features</h3>
