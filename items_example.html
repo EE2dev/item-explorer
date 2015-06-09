@@ -170,11 +170,11 @@
       display:none;
     }
   </style>
-  <script src="../d3/d3.js"></script>
+  <script src="http://d3js.org/d3.v3.js"></script>
 </head>
 <body>
 <pre id="data">
-_customers,item1:LN=very long name of item 1 ....,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12,item13,item14,item15,item16,item17,item18,item19,item20
+_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4:LN=longitem4,item5,item6,item7,item8,item9,item10:LN=longitem10,item11:LN=longitem11,item12:LN=longitem12,item13,item14,item15,item16,item17,item18,item19,item20
 1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
 3,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
@@ -32939,7 +32939,10 @@ _customers,item1:LN=very long name of item 1 ....,item2,item3,item4,item5,item6,
          arcs.set(items[0], [{x: 0, y: 25}, {x: 0, y: 0}]);
          return arcs;
       }    
-      items.sort(function(a, b) {return d3.ascending(x(a), x(b));});
+      // old: items.sort(function(a, b) {return d3.ascending(x(a), x(b));});
+      items.sort(function(a, b) {
+        return d3.ascending(x(mapItemToItemShort(a)), x(mapItemToItemShort(b)));
+      });
       items.forEach(function(d, i, arr) {
         if (i < arr.length-1) {
           arcs.set(d, getArcPositions(arr[i], arr[i+1]));
@@ -32949,9 +32952,10 @@ _customers,item1:LN=very long name of item 1 ....,item2,item3,item4,item5,item6,
     }
     
     // readData("items.csv");
+    // readData("itemsLong.csv");
     readData();
     
-    // initial setup - called by readData()
+    // 1.0 initial setup - called by readData()
     function initialSetup() {
       items = parseFirstColumn(file);
       x.domain(items);        

@@ -298,7 +298,10 @@
          arcs.set(items[0], [{x: 0, y: 25}, {x: 0, y: 0}]);
          return arcs;
       }    
-      items.sort(function(a, b) {return d3.ascending(x(a), x(b));});
+      // old: items.sort(function(a, b) {return d3.ascending(x(a), x(b));});
+      items.sort(function(a, b) {
+        return d3.ascending(x(mapItemToItemShort(a)), x(mapItemToItemShort(b)));
+      });
       items.forEach(function(d, i, arr) {
         if (i < arr.length-1) {
           arcs.set(d, getArcPositions(arr[i], arr[i+1]));
@@ -307,10 +310,11 @@
       return arcs;
     }
     
-    readData("items.csv");
+    // readData("items.csv");
+    readData("itemsLong.csv");
     // readData();
     
-    // initial setup - called by readData()
+    // 1.0 initial setup - called by readData()
     function initialSetup() {
       items = parseFirstColumn(file);
       x.domain(items);        
