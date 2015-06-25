@@ -22,4 +22,5 @@ Supported column features:
 <li>CO= for specifying color in rgb. E.g: CO=rgb(70, 130, 180)
 <li>LN= for specifying long name of item. E.g: LN=myLongItemName
 <li>GR= for specifying group. E.g: GR=1 (used for separated bar charts per group)
+<br>Note that the attribute names must be distinct, other an error occurs.
 </p>
