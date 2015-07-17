@@ -1,0 +1,102 @@
+<!DOCTYPE html>	
+<meta charset="utf-8">
+<head>
+  <link rel="stylesheet" type="text/css" href="libs/itemExplorer.css">
+  <script src="http://d3js.org/d3.v3.js"></script>
+</head>
+
+<body>
+<pre id="data">
+</pre>
+
+  <div class="options container">
+    <h3>Info</h3>
+    <div class="header">current filter:</div>
+    <div id="selectionDiv">
+      <table id="selectionTable">
+        <tbody>
+          <tr class="content"><td><font color="white"> .</font></td></tr>
+          <tr class="content"><td><font color="white"> .</font></td></tr>
+          <tr class="content"><td><font color="white"> .</font></td></tr>
+        </tbody>
+      </table>
+    </div>     
+    <div class="break"></div>
+    <div class="colLeft" id ="itemFrequency">frequency:</div><div class="info left"></div>
+    <div class="colRight" id ="itemPercent">percent:</div><div class="info right"></div>
+  </div>    
+
+  <div id="empty" class="container"></div>
+  
+  <div id="mining" class="container">
+    <h3>Exploration</h3>
+    <div id="patternDiv">
+      <table id="patternTable">
+        <thead>
+          <tr>
+            <th>item 1</th>
+            <th>item 2</th>
+            <th>frequency</th>
+            <th>percent</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+    <div class="interaction sort">
+      <input id="sort" type="checkbox">sort by frequency
+    </div>
+    <div class="interaction update">
+      <input id="update_axis" type="checkbox" name="update">update axis
+    </div>
+    <div class="interaction help">help</div>
+  </div>
+  
+  <script src="libs/itemExplorer.js"></script>
+  <script>  
+    var myIEChart = itemExplorerChart();
+     
+    readData("itemsLong.csv");
+    // readData();
+    
+    function showChart(_file) {
+      d3.select("body")
+        .append("div")
+        .attr("class", "chart")
+        .datum(_file)
+        .call(myIEChart);
+        
+      d3.select("input#sort").on("click", myIEChart.resort);
+      d3.select("input#update_axis").on("click", myIEChart.update);
+      d3.select(".interaction.help")
+        .on("mouseover", myIEChart.showHelp)
+        .on("mouseout", myIEChart.removeHelp);
+    }    
+
+    function readData(csvFile) {
+      if (typeof csvFile !== 'undefined') {
+        d3.csv(csvFile, convertToNumber, function(error, file) {
+          showChart(file);
+        });
+      } 
+      else {
+        file = d3.csv.parse(d3.select("pre#data").text()); 
+        file.forEach( function (row) {
+          convertToNumber(row);
+        });
+        showChart(file);
+      }
+    } 
+
+    function convertToNumber(d) {
+      for (var perm in d) {
+        if (Object.prototype.hasOwnProperty.call(d, perm)) {
+          d[perm] = +d[perm];
+        }
+      }    
+      return d;
+    }  
+  </script>
+</body>
+</html> 
