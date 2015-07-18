@@ -103,6 +103,7 @@ var itemExplorerChart = function() {
     }
     
     // functions for external access
+    /*
     IEChart.loadData = function(_data) {
       file = _data;
       if (_data != 'undefined') {
@@ -110,6 +111,7 @@ var itemExplorerChart = function() {
       }
       return IEChart;
     }
+    */
     
     IEChart.update = function() {
       render(false);
