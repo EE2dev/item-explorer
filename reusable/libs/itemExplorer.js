@@ -16,6 +16,7 @@ var itemExplorerChart = function() {
     var altArcMap = d3.map();
     var frequentItemOne = [];
     var frequencyName;
+    var debug_a = 0;
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
@@ -102,7 +103,7 @@ var itemExplorerChart = function() {
       });
     }
     
-    // functions for external access
+    // 0.0 functions for external access
     /*
     IEChart.loadData = function(_data) {
       file = _data;
@@ -110,8 +111,7 @@ var itemExplorerChart = function() {
       readData(_data);
       }
       return IEChart;
-    }
-    */
+    } */
     
     IEChart.update = function() {
       render(false);
@@ -376,7 +376,11 @@ var itemExplorerChart = function() {
         .attr("y", function(d) { return -(myHeight - y(d.frequency)); })
         .attr("height", function(d) { return myHeight - y(d.frequency); });
       if (reselectData && (document.getElementById('sort').checked))  
-        transBars.each("end", sortItems);        
+        transBars.call(endAll, function () {
+            // console.log("All the transitions have ended!");
+            sortItems();
+        });
+        // transBars.each("end", sortItems);        
     }
     
     // 2.3. shim for IE, Opera
@@ -441,6 +445,24 @@ var itemExplorerChart = function() {
         .attr("d"," M 0 " + bottomY +"l -10 -10 l 20 0 l -10 10")
         .style("fill", rgbString)
         .style("stroke", rgbString);      
+    }
+    
+    // 2.5 callback for when all transitions are finished, called at the end of function 2.2 render(reselectData)
+    function endAll (transition, callback) {
+      var n;
+
+      if (transition.empty()) {
+          callback();
+      }
+      else {
+          n = transition.size();
+          transition.each("end", function () {
+              n--;
+              if (n === 0) {
+                  callback();
+              }
+          });
+      }
     }
     
     // 3.1. check if record r satisfies all selection criteria
@@ -528,8 +550,8 @@ var itemExplorerChart = function() {
     
     //4.2. display arcs for OR Selection altArcId
     function drawArcs(altSelectionFinished, altArcId) {
-      var aId = altSelectionFinished ? altId : (altId + 1);
-      aId = altArcId;
+      // var aId = altSelectionFinished ? altId : (altId + 1);
+      var aId = altArcId;
       d3.selectAll('.altIndicator').selectAll("path.line.altId"+(aId)).remove();     
       d3.selectAll('.altIndicator')
         .filter(function(d) {
@@ -679,7 +701,8 @@ var itemExplorerChart = function() {
     //7.1. update bar chart with new sorting order
     function sortItems() {
       var sortByFreq = document.getElementById('sort').checked;
-        x = x.domain(data.sort((sortByFreq)
+      var data_sorted = data.slice();
+      x = x.domain(data_sorted.sort((sortByFreq)
           ? function(a, b) { return b.frequency - a.frequency; }
           : function(a, b) { return d3.ascending(a.index, b.index); })
           .map(function(d) { return d.itemShort; }));
@@ -792,6 +815,7 @@ var itemExplorerChart = function() {
           if (selectedItemSet.has(data[j].item)) {
             continue;
           }
+
           for (var p=0; p < patterns.length; p++) {
             if (frequentItemOne[i][j] > patterns[p].frequency) {
               patterns.splice(p, 0, {frequency: frequentItemOne[i][j], itemOne: data[i].itemShort, itemTwo: data[j].itemShort});
