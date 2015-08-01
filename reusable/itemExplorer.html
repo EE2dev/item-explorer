@@ -51,14 +51,19 @@
       <input id="update_axis" type="checkbox" name="update">update axis
     </div>
     <div class="interaction help">help</div>
-  </div>
-  
+
   <script src="libs/itemExplorer.js"></script>
   <script>  
-    var myIEChart = itemExplorerChart();
-     
-    readData("itemsLong.csv");
-    // readData();
+    // option 1: call IEChart by passing data. XHR is handled there
+    var myIEChart = itemExplorerChart("itemsLong.csv");
+    showChart(myIEChart.myData()); 
+    // end option 1
+    
+    // option 2: read and process data here
+    // var myIEChart = itemExplorerChart();
+    // readData("itemsLong.csv");
+    // or alternatively: readData();
+    // end option 2
     
     function showChart(_file) {
       d3.select("body")

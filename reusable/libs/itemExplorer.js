@@ -1,14 +1,13 @@
-var itemExplorerChart = function() {
+var itemExplorerChart = function(_myData) {
   "use strict";
     // console.time("Time for data loading");
+    var firstTime = true;
     var file;
     var data;
-    var items;
     var maxFrequencyOfInitialItems;
     var maxFrequencyOfCurrentItems;
     var initialFrequencyTotal = 0;
     var currentFrequencyTotal;
-    var firstTime = true;
     var selectedItemSet = d3.map();
     var listOfAlternativeItemSets = d3.map();
     var alternativeItemSet = null;
@@ -16,7 +15,8 @@ var itemExplorerChart = function() {
     var altArcMap = d3.map();
     var frequentItemOne = [];
     var frequencyName;
-    var debug_a = 0;
+    var chart;
+    var drawingArea;
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
@@ -27,24 +27,13 @@ var itemExplorerChart = function() {
       width = myInnerWidth - padding.left - padding.right,
       myHeight = myInnerHeight - padding.top - padding.bottom;
       
-    var x = d3.scale.ordinal()
-      .rangeRoundBands([0, width], .1);
+    var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+    var y = d3.scale.linear().range([myHeight, 0]);
+    var xAxis = d3.svg.axis().scale(x).orient("bottom");     
+    var yAxis = d3.svg.axis().scale(y).orient("left");
+    
+    var controlPointY = 2 * (padding.bottom - 25) - 1;  
 
-    var y = d3.scale.linear()
-      .range([myHeight, 0]);
-    
-    var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom");
-      
-    var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left");
-    
-    var chart, drawingArea;
-     
-    var controlPointY = 2 * (padding.bottom - 25) - 1;
-    
     var altArc = d3.svg.line()
       .interpolate(function(points) {
         var mean = ((points[0][0] + points[1][0]) / 2);
@@ -63,7 +52,6 @@ var itemExplorerChart = function() {
          arcs.set(items[0], [{x: 0, y: 25}, {x: 0, y: 0}]);
          return arcs;
       }    
-      // old: items.sort(function(a, b) {return d3.ascending(x(a), x(b));});
       items.sort(function(a, b) {
         return d3.ascending(x(mapItemToItemShort(a)), x(mapItemToItemShort(b)));
       });
@@ -75,32 +63,31 @@ var itemExplorerChart = function() {
       return arcs;
     }
     
-    function svgInit(svg) {
-      svg = svg.attr("width", myOuterWidth)
-      .attr("height", myOuterHeight)
-      .append("g")
-      .attr("class", "margin")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
-    drawingArea = svg.append("g")
-      .attr("class", "padding")
-      .attr("transform", "translate(" + padding.left + "," + padding.top + ")");
-
-    drawingArea.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + myHeight + ")"); 
+    // 0.0 functions for external access
+    function IEChart(selection) {
+      console.log("_myData "+ _myData);
+      if (typeof _myData !== 'undefined') {
+        readData(_myData, selection);
+      } // else data is inherited from html
+      else {
+        selection.each(function(data) {
+          var div = d3.select(this);
+          file = data; 
+          chart = div.selectAll("svg").data([file]);
+          chart = chart.enter()
+            .append("svg")
+            .call(svgInit);
+          initialSetup();  
+        });
+      }
     }
     
-    function IEChart(selection) {
-      selection.each(function(data) {
-        var div = d3.select(this);
-        file = data; 
-        chart = div.selectAll("svg").data([file]);
-        chart = chart.enter()
-          .append("svg")
-          .call(svgInit);
-        initialSetup();  
-      });
+    IEChart.myData = function (_myData) {
+      if (!arguments.length) {
+        return file;
+      }
+      file = _myData;
+      return IEChart;      
     }
     
     // 0.0 functions for external access
@@ -132,17 +119,44 @@ var itemExplorerChart = function() {
       removeHelp();
       return IEChart;
     }
+    
     /*
     function readData(csvFile) {
-      if (typeof csvFile !== "<pre>") {
+      if (typeof csvFile !== 'undefined') {
         d3.csv(csvFile, convertToNumber, function(error, file) {
           showChart(file);
+          console.log("1");
         });
       } 
       else {
         file = d3.csv.parse(d3.select("pre#data").text()); 
         file.forEach( function (row) {
           convertToNumber(row);
+          console.log("1.1");
+        });
+        showChart(file);
+      }
+    } */
+    
+    function readData(csvFile, selection) {
+      if (typeof csvFile !== 'undefined') {
+        d3.csv(csvFile, convertToNumber, function(error, f) {
+          selection.each(function(data) {
+            var div = d3.select(this);
+            file = f; 
+            chart = div.selectAll("svg").data([file]);
+            chart = chart.enter()
+              .append("svg")
+              .call(svgInit);
+            initialSetup();  
+          });
+        });
+      } 
+      else {
+        file = d3.csv.parse(d3.select("pre#data").text()); 
+        file.forEach( function (row) {
+          convertToNumber(row);
+          console.log("1.1");
         });
         showChart(file);
       }
@@ -156,10 +170,27 @@ var itemExplorerChart = function() {
       }    
       return d;
     }  
-    */
-    // 1.0 initial setup - called by IEChart()
+    
+    // 1.0 main svg - called by IEChart()
+    function svgInit(svg) {
+      svg = svg.attr("width", myOuterWidth)
+      .attr("height", myOuterHeight)
+      .append("g")
+      .attr("class", "margin")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+      drawingArea = svg.append("g")
+        .attr("class", "padding")
+        .attr("transform", "translate(" + padding.left + "," + padding.top + ")");
+
+      drawingArea.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + myHeight + ")"); 
+    }
+    
+    // 1.1 initial setup - called by IEChart()
     function initialSetup() {
-      items = parseFirstColumn(file);
+      var items = parseFirstColumn(file);
       x.domain(items);        
       d3.select(".x.axis").call(xAxis);
       render(true);
@@ -366,7 +397,7 @@ var itemExplorerChart = function() {
         d3.max(data, function(d) { return d.frequency; }) : maxFrequencyOfInitialItems;
       y.domain([0, maxFrequencyOfCurrentItems]);
 
-      updateInfo();
+      updateBars();
       showPatterns();
       
       var transition = drawingArea.transition().duration(750);
@@ -379,22 +410,9 @@ var itemExplorerChart = function() {
         transBars.call(endAll, function () {
             // console.log("All the transitions have ended!");
             sortItems();
-        });
-        // transBars.each("end", sortItems);        
+        });     
     }
-    
-    // 2.3. shim for IE, Opera
-    function makeUnselectableForOtherBrowsers() {
-    	d3.selectAll(".x.axis g.tick>text").attr("unselectable", "on");
-    	d3.selectAll(".y.axis g.tick>text").attr("unselectable", "on");
-    	// above does not seem to work for shift + click
-    	window.onload = function() {
-			  document.onselectstart = function() {
-			    return false;
-			  }
-			}
-    }
-    
+        
     // 2.4 tooltip. argument is d - data of the corresponding bar
     function showTooltipFor (d) {
       var tooltipHeight = 41;
@@ -405,7 +423,7 @@ var itemExplorerChart = function() {
       var sel = d3.selectAll("g.gtooltip").filter( function (da, i) { return da === d;});
       var textBoxSel = sel.insert("g", ".selection.bar")
         .attr("class", "tooltip textBoxGroup")
-      //  .attr("transform", "translate(100,0)");
+        //.attr("transform", "translate(100,0)");
       var textSel = textBoxSel.append("g")
         .attr("class", "tooltip textgroup");
       
@@ -628,7 +646,7 @@ var itemExplorerChart = function() {
     }
     
     //6.1. update display of item selections and item OR selections in bar chart. Also calls function 6.2
-    function updateInfo() {
+    function updateBars() {
       var infoPercent = d3.round((currentFrequencyTotal / initialFrequencyTotal * 100), 1) + "%";
       var infos = [currentFrequencyTotal, infoPercent];
       d3.selectAll("div.info")
@@ -776,9 +794,9 @@ var itemExplorerChart = function() {
     
     //8.1. function 1 for computing frequent 2-item set
     function initializeFrequentItems() {
-      for (var i = 0; i < items.length; i++) {
+      for (var i = 0; i < data.length; i++) {
         var frequentItemTwo = [];
-        for (var j = 0; j < items.length; j++) {
+        for (var j = 0; j < data.length; j++) {
           frequentItemTwo[j] = 0;
         }
         frequentItemOne[i] = frequentItemTwo;
@@ -872,7 +890,7 @@ var itemExplorerChart = function() {
       helpText[4] = "To finish OR selections, select the last item without 'alt' ";
       helpText[6] = "Exploration table shows for the current selection";
       helpText[7] = "the TOP 3 most frequent 2-item sets";
-      helpText[8] = "which don't contain the selected items.";
+      helpText[8] = "which don't contain the already selected items.";
     
       helpText.forEach(function (element, index){
         drawingArea.append("text")
@@ -917,6 +935,18 @@ var itemExplorerChart = function() {
       newRGB[1] = Math.round(newRGB[1] + 0.9 * (255 - newRGB[1]));
       newRGB[2] = Math.round(newRGB[2] + 0.9 * (255 - newRGB[2]));
       return "rgb(" + newRGB[0] + ", " + newRGB[1] + ", " + newRGB[2] +")";
+    }
+    
+    //10.3. shim for IE, Opera
+    function makeUnselectableForOtherBrowsers() {
+    	d3.selectAll(".x.axis g.tick>text").attr("unselectable", "on");
+    	d3.selectAll(".y.axis g.tick>text").attr("unselectable", "on");
+    	// above does not seem to work for shift + click
+    	window.onload = function() {
+			  document.onselectstart = function() {
+			    return false;
+			  }
+			}
     }
     return IEChart;
 }
