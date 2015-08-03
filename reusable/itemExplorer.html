@@ -7,6 +7,31 @@
 
 <body>
 <pre id="data">
+_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4:LN=longitem4,item5,item6,item7,item8,item9,item10:LN=longitem10,item11:LN=longitem11,item12:LN=longitem12,item13,item14,item15,item16,item17,item18,item19,item20
+1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+3,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+4,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+5,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+6,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+7,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+8,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+9,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+10,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+11,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+12,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+13,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+14,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+15,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+16,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+17,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+18,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+19,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+20,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+21,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0
+22,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+23,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
+24,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </pre>
 
   <div class="options container">
@@ -55,7 +80,8 @@
   <script src="libs/itemExplorer.js"></script>
   <script>  
     // option 1: call IEChart by passing data. XHR is handled there
-    var myIEChart = itemExplorerChart("itemsLong.csv");
+    // var myIEChart = itemExplorerChart("itemsLong.csv");
+    var myIEChart = itemExplorerChart("<pre>");
     showChart(myIEChart.myData()); 
     // end option 1
     
@@ -76,7 +102,7 @@
       d3.select("input#update_axis").on("click", myIEChart.update);
       d3.select(".interaction.help")
         .on("mouseover", myIEChart.showHelp)
-        .on("mouseout", myIEChart.removeHelp);
+          .on("mouseout", myIEChart.removeHelp);
     }    
 
     function readData(csvFile) {

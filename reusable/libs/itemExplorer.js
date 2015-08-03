@@ -68,8 +68,9 @@ var itemExplorerChart = function(_myData) {
       console.log("_myData "+ _myData);
       if (typeof _myData !== 'undefined') {
         readData(_myData, selection);
-      } // else data is inherited from html
+      } 
       else {
+        // else if data is processed in html file
         selection.each(function(data) {
           var div = d3.select(this);
           file = data; 
@@ -139,8 +140,10 @@ var itemExplorerChart = function(_myData) {
     } */
     
     function readData(csvFile, selection) {
-      if (typeof csvFile !== 'undefined') {
+      if (csvFile !== "<pre>") {
         d3.csv(csvFile, convertToNumber, function(error, f) {
+          createChart(selection, f);
+          /*
           selection.each(function(data) {
             var div = d3.select(this);
             file = f; 
@@ -150,17 +153,39 @@ var itemExplorerChart = function(_myData) {
               .call(svgInit);
             initialSetup();  
           });
+          */
         });
       } 
       else {
         file = d3.csv.parse(d3.select("pre#data").text()); 
         file.forEach( function (row) {
           convertToNumber(row);
-          console.log("1.1");
         });
-        showChart(file);
+        createChart(selection, file);
+        /*        
+        selection.each(function(data) {
+            var div = d3.select(this);
+            chart = div.selectAll("svg").data([file]);
+            chart = chart.enter()
+              .append("svg")
+              .call(svgInit);
+            initialSetup();  
+          });
+        */  
       }
     } 
+    
+    function createChart(selection, _file) {
+      selection.each(function(data) {
+      var div = d3.select(this);
+      file = _file; 
+      chart = div.selectAll("svg").data([file]);
+      chart = chart.enter()
+        .append("svg")
+        .call(svgInit);
+      initialSetup();  
+      });
+    }
 
     function convertToNumber(d) {
       for (var perm in d) {
@@ -282,7 +307,7 @@ var itemExplorerChart = function(_myData) {
       .attr("class", "y axis")
       .append("text")
       .attr("x", -5)
-      .attr("y", -12)
+      .attr("y", -14)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text(frequencyName.slice(1, frequencyName.length));
