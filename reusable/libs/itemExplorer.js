@@ -1,6 +1,6 @@
 var itemExplorerChart = function(_myData) {
   "use strict";
-    // console.time("Time for data loading");
+    console.time("Time for data loading");
     var firstTime = true;
     var file;
     var data;
@@ -89,17 +89,7 @@ var itemExplorerChart = function(_myData) {
       }
       file = _myData;
       return IEChart;      
-    }
-    
-    // 0.0 functions for external access
-    /*
-    IEChart.loadData = function(_data) {
-      file = _data;
-      if (_data != 'undefined') {
-      readData(_data);
-      }
-      return IEChart;
-    } */
+    }    
     
     IEChart.update = function() {
       render(false);
@@ -120,40 +110,11 @@ var itemExplorerChart = function(_myData) {
       removeHelp();
       return IEChart;
     }
-    
-    /*
-    function readData(csvFile) {
-      if (typeof csvFile !== 'undefined') {
-        d3.csv(csvFile, convertToNumber, function(error, file) {
-          showChart(file);
-          console.log("1");
-        });
-      } 
-      else {
-        file = d3.csv.parse(d3.select("pre#data").text()); 
-        file.forEach( function (row) {
-          convertToNumber(row);
-          console.log("1.1");
-        });
-        showChart(file);
-      }
-    } */
-    
+        
     function readData(csvFile, selection) {
       if (csvFile !== "<pre>") {
         d3.csv(csvFile, convertToNumber, function(error, f) {
           createChart(selection, f);
-          /*
-          selection.each(function(data) {
-            var div = d3.select(this);
-            file = f; 
-            chart = div.selectAll("svg").data([file]);
-            chart = chart.enter()
-              .append("svg")
-              .call(svgInit);
-            initialSetup();  
-          });
-          */
         });
       } 
       else {
@@ -162,17 +123,16 @@ var itemExplorerChart = function(_myData) {
           convertToNumber(row);
         });
         createChart(selection, file);
-        /*        
-        selection.each(function(data) {
-            var div = d3.select(this);
-            chart = div.selectAll("svg").data([file]);
-            chart = chart.enter()
-              .append("svg")
-              .call(svgInit);
-            initialSetup();  
-          });
-        */  
       }
+    } 
+
+    function convertToNumber(d) {
+      for (var perm in d) {
+          if (Object.prototype.hasOwnProperty.call(d, perm)) {
+            d[perm] = +d[perm];
+          }
+        }  
+      return d;
     } 
     
     function createChart(selection, _file) {
@@ -185,16 +145,7 @@ var itemExplorerChart = function(_myData) {
         .call(svgInit);
       initialSetup();  
       });
-    }
-
-    function convertToNumber(d) {
-      for (var perm in d) {
-        if (Object.prototype.hasOwnProperty.call(d, perm)) {
-          d[perm] = +d[perm];
-        }
-      }    
-      return d;
-    }  
+    } 
     
     // 1.0 main svg - called by IEChart()
     function svgInit(svg) {
@@ -415,7 +366,7 @@ var itemExplorerChart = function(_myData) {
         maxFrequencyOfInitialItems = d3.max(data, function(d) { return d.frequency; });
         renderFirstTime();
         firstTime = false;
-        // console.timeEnd("Time for data loading");
+        console.timeEnd("Time for data loading");
       }
       
       maxFrequencyOfCurrentItems = (document.getElementById('update_axis').checked) ?
@@ -890,10 +841,17 @@ var itemExplorerChart = function(_myData) {
       d3.select("div.interaction.help")
         .style("background", "white")
         .style("border", "0px solid darkgrey");
+        
+      // var rect = d3.select("div.interaction.help").node().getBoundingClientRect();
+      // var rect = d3.select("div#mining").node().getBoundingClientRect();
+      var rect = drawingArea.node().getBoundingClientRect();
+      //  console.log(rect.top, rect.right, rect.bottom, rect.left);  
+      var xPosition = (rect.right - rect.left) / 2 - 200;  
+      var yPosition = (rect.bottom - rect.top) / 2 - 100;  
       
       drawingArea.append("rect")
         .attr("class", "helpBox")
-        .attr('x', 760)
+        .attr('x', rect.right)
         .attr('y', top)
         .attr('width', 1)
         .attr('height', 1)
@@ -901,8 +859,9 @@ var itemExplorerChart = function(_myData) {
         .style("stroke-width", 2)
         .style("fill", "white")
         .style("opacity", 0)
-        .transition().delay(delay).duration(400)
-        .attr('x', 360)
+        .transition().delay(delay).duration(400)      
+        .attr('x', xPosition)
+        .attr('y', yPosition)
         .attr('width', 400)
         .attr('height', 200)
         .style("opacity", 0.9);
@@ -920,8 +879,8 @@ var itemExplorerChart = function(_myData) {
       helpText.forEach(function (element, index){
         drawingArea.append("text")
           .attr("class", "helpBox")
-          .attr("x", 385)
-          .attr("y", top + 20 + index*18)
+          .attr("x", xPosition + 25)
+          .attr("y", yPosition + 20 + index*18)
           .attr("dy", ".71em")
           .attr("fill", "black")
           .text(element)

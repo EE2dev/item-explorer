@@ -33,7 +33,7 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4:LN=lon
 23,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
 24,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </pre>
-
+<div class="center">
   <div class="options container">
     <h3>Info</h3>
     <div class="header">current filter:</div>
@@ -76,19 +76,22 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4:LN=lon
       <input id="update_axis" type="checkbox" name="update">update axis
     </div>
     <div class="interaction help">help</div>
+  </div>
 
   <script src="libs/itemExplorer.js"></script>
   <script>  
-    // option 1: call IEChart by passing data. XHR is handled there
-    // var myIEChart = itemExplorerChart("itemsLong.csv");
-    var myIEChart = itemExplorerChart("<pre>");
+    // option 1a: call IEChart by passing data. XHR is handled in itemExplorer.js
+    var myIEChart = itemExplorerChart("itemsLong.csv");
+    // option 1b: call IEChart by reading data from the <pre id="data"> tag. Data processing is handled itemExplorer.js
+    // var myIEChart = itemExplorerChart("<pre>");
     showChart(myIEChart.myData()); 
     // end option 1
     
-    // option 2: read and process data here
+    // option 2a: read and process data here
     // var myIEChart = itemExplorerChart();
     // readData("itemsLong.csv");
-    // or alternatively: readData();
+    // option 2b: Data processing is handled here 
+    // readData();
     // end option 2
     
     function showChart(_file) {
