@@ -7,7 +7,7 @@
 
 <body>
 <pre id="data">
-_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4:LN=longitem4,item5,item6,item7,item8,item9,item10:LN=longitem10,item11:LN=longitem11,item12:LN=longitem12,item13,item14,item15,item16,item17,item18,item19,item20
+_customers,item1:LN=longitem1:GR=1,item2:LN=longitem2,item3:LN=longitem3:GR=5,item4:LN=longitem4:GR=1,item5,item6:GR=8,item7,item8:GR=5,item9,item10:LN=longitem10:GR=5,item11:LN=longitem11,item12:LN=longitem12,item13,item14,item15,item16,item17,item18,item19,item20
 1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
 3,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
@@ -81,9 +81,9 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4:LN=lon
   <script src="libs/itemExplorer.js"></script>
   <script>  
     // option 1a: call IEChart by passing data. XHR is handled in itemExplorer.js
-    var myIEChart = itemExplorerChart("itemsLong.csv");
+    // var myIEChart = itemExplorerChart("itemsLong.csv");
     // option 1b: call IEChart by reading data from the <pre id="data"> tag. Data processing is handled itemExplorer.js
-    // var myIEChart = itemExplorerChart("<pre>");
+    var myIEChart = itemExplorerChart("<pre>");
     showChart(myIEChart.myData()); 
     // end option 1
     

@@ -4,6 +4,8 @@ var itemExplorerChart = function(_myData) {
     var firstTime = true;
     var file;
     var data;
+    // var groupArray = [];
+    var groupMap = d3.map();
     var maxFrequencyOfInitialItems;
     var maxFrequencyOfCurrentItems;
     var initialFrequencyTotal = 0;
@@ -26,7 +28,7 @@ var itemExplorerChart = function(_myData) {
       myInnerHeight = myOuterHeight - margin.top - margin.bottom,
       width = myInnerWidth - padding.left - padding.right,
       myHeight = myInnerHeight - padding.top - padding.bottom;
-      
+     
     var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
     var y = d3.scale.linear().range([myHeight, 0]);
     var xAxis = d3.svg.axis().scale(x).orient("bottom");     
@@ -137,13 +139,18 @@ var itemExplorerChart = function(_myData) {
     
     function createChart(selection, _file) {
       selection.each(function(data) {
-      var div = d3.select(this);
-      file = _file; 
-      chart = div.selectAll("svg").data([file]);
-      chart = chart.enter()
-        .append("svg")
-        .call(svgInit);
-      initialSetup();  
+        file = _file; 
+        var items = parseFirstColumn(file);
+        // console.log(groupArray);
+        // console.log(groupMap.get(0));
+        x.domain(items);        
+        var div = d3.select(this);
+        chart = div.selectAll("svg").data([file]);
+        chart = chart.enter()
+          .append("svg")
+          .call(svgInit);
+        d3.select(".x.axis").call(xAxis);
+        render(true);   
       });
     } 
     
@@ -162,15 +169,7 @@ var itemExplorerChart = function(_myData) {
       drawingArea.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + myHeight + ")"); 
-    }
-    
-    // 1.1 initial setup - called by IEChart()
-    function initialSetup() {
-      var items = parseFirstColumn(file);
-      x.domain(items);        
-      d3.select(".x.axis").call(xAxis);
-      render(true);
-    }
+    }    
         
     // 1.3 helper (parse all parts of column name) for reading data from file
     function parseFirstColumn(_file) {
@@ -229,6 +228,7 @@ var itemExplorerChart = function(_myData) {
             break;  
         }
       });
+      addGroup(_itemObject.itemShort, _itemObject.group);
     }
     
     // 1.5 helper function to map between two different column representations
@@ -249,6 +249,31 @@ var itemExplorerChart = function(_myData) {
       });
       return _longName;
     }
+    
+    // 1.7 helper processing function for storing distinct groups
+    function addGroup(itemObject, group) {
+      var newArray = [itemObject];
+      if (groupMap.has(group)) {
+        newArray = groupMap.get(group)
+        newArray.push(itemObject);
+        groupMap.set(group, newArray);
+        return;
+      }
+      groupMap.set(group, newArray);
+    }    
+    /*
+    function addGroup(group) {
+      var groupFound = false;
+      groupArray.forEach(function(elem) {
+        if (elem === group) {
+          groupFound = true;
+        }
+      });
+      if (!groupFound) {
+        groupArray.push(group);
+      }
+    }
+    */
     
     // 2.1. setting up the main display
     function renderFirstTime() {
