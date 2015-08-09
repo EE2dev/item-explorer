@@ -20,8 +20,8 @@ Example for first line of csv file with column features:
 
 
 <h5>Supported column features:</h5>
-<li><code>CO=</code> for specifying color in rgb. E.g: CO=rgb(70 130 180)
-<li><code>LN=</code> for specifying long name of item. E.g: LN=myLongItemName
-<li><code>GR=</code> for specifying group. E.g: GR=1 (used for separated bar charts per group)
+<li><code>CO=</code> for specifying color in rgb. E.g: <code>CO=rgb(70 130 180)</code>
+<li><code>LN=</code> for specifying long name of item. E.g: <code>LN=myLongItemName</code>
+<li><code>GR=</code> for specifying group. E.g: <code>GR=1</code> (used for separated bar charts per group)
 <br>Note that the attribute names must be distinct, otherwise an error occurs.
 </p>
