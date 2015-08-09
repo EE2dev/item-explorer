@@ -1,4 +1,4 @@
-_customers,item1:LN=longitem1:GR=Hase,item2:LN=longitem2:GR=Hase,item3:LN=veryverylongitem3:GR=Hase,item4:LN=longitem4,item5,item6,item7,item8,item9,item10:LN=longitem10,item11:LN=longitem11,item12:LN=longitem12,item13,item14,item15,item16,item17,item18,item19,item20
+_customers,item1:LN=longitem1:GR=Hase,item2:LN=longitem2:GR=Hase,item3:LN=veryverylongitem3:GR=Hase,item4:LN=longitem4,item5:GR=Fuchs,item6,item7:GR=Fuchs,item8:GR=Fuchs,item9,item10:LN=longitem10,item11:LN=longitem11:GR=Fuchs,item12:LN=longitem12,item13,item14:GR=Eber,item15,item16:GR=Eber,item17:GR=Eber,item18,item19,item20
 1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0
 2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
 3,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0
