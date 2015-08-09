@@ -1,10 +1,9 @@
 var itemExplorerChart = function(_myData) {
   "use strict";
-    console.time("Time for data loading");
+    // console.time("Time for data loading");
     var firstTime = true;
     var file;
     var data;
-    // var groupArray = [];
     var groupMap = d3.map();
     var maxFrequencyOfInitialItems;
     var maxFrequencyOfCurrentItems;
@@ -19,6 +18,7 @@ var itemExplorerChart = function(_myData) {
     var frequencyName;
     var chart;
     var drawingArea;
+    // var currentGroupSelector;
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
@@ -29,10 +29,20 @@ var itemExplorerChart = function(_myData) {
       width = myInnerWidth - padding.left - padding.right,
       myHeight = myInnerHeight - padding.top - padding.bottom;
      
-    var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+    // delete
+    var x; // set by current groups scale with alt selections 4.2. checkAlternativeSelectionWithinGroup(item)
+    //    = d3.scale.ordinal().rangeRoundBands([0, width], 0.1);
     var y = d3.scale.linear().range([myHeight, 0]);
     var xAxis = d3.svg.axis().scale(x).orient("bottom");     
     var yAxis = d3.svg.axis().scale(y).orient("left");
+    // delete until here
+    
+    /*
+    var xMap = d3.map(); 
+    // var y = d3.scale.linear().range([myHeight, 0]);   
+    var xAxisMap = d3.map();   
+    var yAxisMap = d3.map(); 
+    */
     
     var controlPointY = 2 * (padding.bottom - 25) - 1;  
 
@@ -112,6 +122,16 @@ var itemExplorerChart = function(_myData) {
       removeHelp();
       return IEChart;
     }
+    
+    /*
+    IEChart.paddingLeft = function(padLeft) {
+      if (!arguments.length) {
+        return padding.left;
+      }
+      padding.left = padLeft;
+      return IEChart;      
+    }  
+    */
         
     function readData(csvFile, selection) {
       if (csvFile !== "<pre>") {
@@ -141,16 +161,38 @@ var itemExplorerChart = function(_myData) {
       selection.each(function(data) {
         file = _file; 
         var items = parseFirstColumn(file);
-        // console.log(groupArray);
-        // console.log(groupMap.get(0));
-        x.domain(items);        
+        console.log(groupMap);
+        
         var div = d3.select(this);
-        chart = div.selectAll("svg").data([file]);
-        chart = chart.enter()
-          .append("svg")
+        chart = div.append("svg")
           .call(svgInit);
-        d3.select(".x.axis").call(xAxis);
-        render(true);   
+        
+        var counter = 0;
+        var xAxis;
+        var groupArea;
+        
+        groupMap.forEach(function (groupName, groupProperties){
+          groupArea = d3.select("g.padding").append("g")
+            .attr("class", "groupBlock group" + groupName)
+           // .attr("transform", "translate("+ counter * 167 + ", 0)"); 
+          
+          groupArea.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + myHeight + ")"); 
+            
+          // d3.select("group" + group + ">.x.axis").call(xAxis);
+          d3.select(groupProperties.selector + ">.x.axis").call(groupProperties.axis);
+          
+          // currentGroupSelector = "g.group"+group;
+          if (counter === 0) {
+            render(true, groupProperties);
+          }
+          else {
+            render(false, groupProperties);
+          }
+          counter++;
+        });  
+        // render(true);   
       });
     } 
     
@@ -165,10 +207,12 @@ var itemExplorerChart = function(_myData) {
       drawingArea = svg.append("g")
         .attr("class", "padding")
         .attr("transform", "translate(" + padding.left + "," + padding.top + ")");
-
+      
+      /*
       drawingArea.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + myHeight + ")"); 
+        */
     }    
         
     // 1.3 helper (parse all parts of column name) for reading data from file
@@ -194,13 +238,14 @@ var itemExplorerChart = function(_myData) {
           color: "rgb(70, 130, 180)",  
           frequency: 0, 
           index: i,
-          group: 0
+          group: ""
         };
         itemParts = d.split(":");
         setItemProperties( itemObject, itemParts);         
         return itemObject;
       });
-
+      
+      finishGroupProperties(_items.length);
       _items = _items.map( function(d,i) {
         var itemPiece = d.split(":");
         return itemPiece[0];
@@ -250,35 +295,47 @@ var itemExplorerChart = function(_myData) {
       return _longName;
     }
     
-    // 1.7 helper processing function for storing distinct groups
+    // 1.7 helper processing function for storing properties for distinct groups
     function addGroup(itemObject, group) {
-      var newArray = [itemObject];
+      var groupProperties;
       if (groupMap.has(group)) {
-        newArray = groupMap.get(group)
-        newArray.push(itemObject);
-        groupMap.set(group, newArray);
-        return;
+        groupProperties = groupMap.get(group)
+        groupProperties.items.push(itemObject);
+      } 
+      else {
+        groupProperties =
+          {
+            items: [itemObject],
+            data: [],
+            selector: "g.group"+group,
+            width: -1,
+            x: null, // the scale
+            axis: null,
+            firstTime: true
+          };
       }
-      groupMap.set(group, newArray);
+      groupMap.set(group, groupProperties);
     }    
-    /*
-    function addGroup(group) {
-      var groupFound = false;
-      groupArray.forEach(function(elem) {
-        if (elem === group) {
-          groupFound = true;
-        }
-      });
-      if (!groupFound) {
-        groupArray.push(group);
-      }
+    
+    // 1.7 helper processing function for adding remaining properties for distinct groups
+    function finishGroupProperties(numberOfItems) {
+      groupMap.forEach(function (groupName, groupProperties){
+        var newGroupProperties = groupProperties;
+        newGroupProperties.width = width * groupProperties.items.length / numberOfItems;
+        newGroupProperties.x = d3.scale.ordinal()
+          .domain(newGroupProperties.items).rangeRoundBands([0, newGroupProperties.width], .1);
+        newGroupProperties.axis = d3.svg.axis().scale(newGroupProperties.x).orient("bottom");
+
+        groupMap.set(groupName, newGroupProperties);
+      });  
     }
-    */
     
     // 2.1. setting up the main display
-    function renderFirstTime() {
-      y.domain([0, maxFrequencyOfInitialItems]);
-              
+    function renderFirstTime(group) {
+      y.domain([0, maxFrequencyOfInitialItems]);      
+      
+      drawingArea = d3.select(group.selector);
+      
       drawingArea.append("g")
       .attr("class", "y axis")
       .append("text")
@@ -288,18 +345,18 @@ var itemExplorerChart = function(_myData) {
       .style("text-anchor", "end")
       .text(frequencyName.slice(1, frequencyName.length));
       
-      var bars = d3.selectAll(".x>.tick").data(data);
+      var bars = drawingArea.selectAll(".x>.tick").data(group.data);
       var indicator = drawingArea.select(".x.axis").selectAll('g.tick')
         .append('g')
         .attr('class', 'indicator')
       
-      d3.selectAll(".x.axis g.tick>text").attr("class", "unselect");
+      drawingArea.selectAll(".x.axis g.tick>text").attr("class", "unselect");
       
       indicator.append('rect')
         .attr('class', 'colorIndicator')
-        .attr('x', (x.rangeBand()/2) * -1)
+        .attr('x', (group.x.rangeBand()/2) * -1)
         .attr('y', 0)
-        .attr('width', x.rangeBand())
+        .attr('width', group.x.rangeBand())
         .attr('height', 25)
         .style("stroke","black")
         .style("stroke-width", 2)
@@ -314,20 +371,20 @@ var itemExplorerChart = function(_myData) {
       // var bars = d3.selectAll(".x>.tick").data(data);
       bars.append("rect")
         .attr("class", "bar drawn")
-        .attr("x", -x.rangeBand()/2)
-        .attr("width", x.rangeBand())
+        .attr("x", -group.x.rangeBand()/2)
+        .attr("width", group.x.rangeBand())
         .attr("y", 0)
         .attr("height", 0)
         .style("fill", function(d) { return d.color;});
       
       var selArea = drawingArea.selectAll("g.gtooltip")
-        .data(data)
+        .data(group.data)
         .enter()
         .append("g")
         .attr("class", "gtooltip");
 
       selArea.attr("transform", function (d) {
-          var trans = d3.selectAll(".x>.tick").filter( function (da) {return da === d;}).attr("transform");
+          var trans = d3.selectAll(".x>.tick").filter( function (da) { return da === d;}).attr("transform");
           if (trans === trans.split(",")[0]) { // fix for IE
           	trans = trans.substr(0, trans.length-1) + ", " + myHeight + ")";
           }
@@ -344,8 +401,8 @@ var itemExplorerChart = function(_myData) {
       
       selArea.append("rect")
         .attr("class", "selection bar unselect")
-        .attr("x", -x.rangeBand()/2)
-        .attr("width", x.rangeBand())
+        .attr("x", -group.x.rangeBand()/2)
+        .attr("width", group.x.rangeBand())
         .attr("y", function(d) { return -(myHeight - y(maxFrequencyOfInitialItems)); })
         .attr("height", myHeight + 20 - y(maxFrequencyOfInitialItems))
         .on("mouseover", function(d) {
@@ -368,7 +425,14 @@ var itemExplorerChart = function(_myData) {
     }
     
     // 2.2. displaying bars for current selection
-    function render(reselectData) {
+    function render(reselectData, group) {
+      if (typeof group === 'undefined') {
+        group = {
+            items: [],
+            data: data,
+            selector: "g.group"
+          };
+      }
       if (reselectData) {
       	currentFrequencyTotal = 0;
         initializeFrequentItems();
@@ -387,11 +451,19 @@ var itemExplorerChart = function(_myData) {
           }
         })
       }
-      if (firstTime) {
+      group.data = data.filter(function (d) {return (group.items.indexOf(d.itemShort) !== -1);});
+      
+      if (group.firstTime) {
         maxFrequencyOfInitialItems = d3.max(data, function(d) { return d.frequency; });
-        renderFirstTime();
-        firstTime = false;
-        console.timeEnd("Time for data loading");
+        renderFirstTime(group);
+        group.firstTime = false;
+        /*
+        console.log("1 - Hase");
+        console.log(groupMap.get("Hase"));
+        console.log("2 - ");
+        console.log(groupMap.get(""));
+        */
+        // console.timeEnd("Time for data loading");
       }
       
       maxFrequencyOfCurrentItems = (document.getElementById('update_axis').checked) ?
@@ -401,8 +473,11 @@ var itemExplorerChart = function(_myData) {
       updateBars();
       showPatterns();
       
-      var transition = drawingArea.transition().duration(750);
-      transition.select(".y.axis").call(yAxis);
+      var transition = d3.select("svg").transition().duration(750);
+      transition.selectAll(".y.axis").call(yAxis);
+      transition.selectAll(".groupBlock").attr("transform",
+        function(d,i) { return "translate("+ i * 167 + ", 0)"; 
+        });
         
       var transBars = transition.selectAll(".bar.drawn")
         .attr("y", function(d) { return -(myHeight - y(d.frequency)); })
@@ -527,6 +602,11 @@ var itemExplorerChart = function(_myData) {
       if (null === alternativeItemSet) {
         alternativeItemSet = d3.map();
       }
+      // just allow alternative selections within a group
+      if (!checkAlternativeSelectionWithinGroup(item)) {
+        return ;
+      }
+      
       if (d3.event.shiftKey) {
         if (alternativeItemSet.has(item)) {
           alternativeItemSet.remove(item);
@@ -567,7 +647,41 @@ var itemExplorerChart = function(_myData) {
       }
     }
     
-    //4.2. display arcs for OR Selection altArcId
+    // 4.2. check if alternative selection is within group
+    function checkAlternativeSelectionWithinGroup(item) {
+      if (!alternativeItemSet.empty()) {
+        var oneAlternativeItem = alternativeItemSet.keys()[0]; 
+        var currentGroup;        
+        
+        if (typeof alternativeItemSet.group === 'undefined') {
+          data.forEach(function(_item) {
+            if (_item.item === oneAlternativeItem) {
+              // setting the group and the scale for the alt arcs
+              alternativeItemSet.group = _item.group;
+              x = groupMap.get(alternativeItemSet.group).x;
+            }
+            if (_item.item === item) {
+              currentGroup = _item.group;
+            }
+          });
+        }
+        else {
+          data.forEach(function(_item) {
+            if (_item.item === item) {
+              currentGroup = _item.group;
+            }
+          });  
+        }
+        console.log("currentGroup: " + currentGroup);
+        console.log("relevantGroup: " + alternativeItemSet.group);
+        return (currentGroup === alternativeItemSet.group);
+      }
+      else {
+        return true;
+      }
+    }
+    
+    //4.3. display arcs for OR Selection altArcId
     function drawArcs(altSelectionFinished, altArcId) {
       // var aId = altSelectionFinished ? altId : (altId + 1);
       var aId = altArcId;
@@ -584,6 +698,7 @@ var itemExplorerChart = function(_myData) {
         .style("stroke-dasharray", function (d) { 
           return altSelectionFinished ? "" : "2,2";});
     }
+    
     
     //5.1 process (regular) selection for given item
     function updateSelection(item) {
@@ -616,6 +731,9 @@ var itemExplorerChart = function(_myData) {
     	else {    
 	      if (d3.event.shiftKey) {
           if (!(null === alternativeItemSet)) {
+            if (!checkAlternativeSelectionWithinGroup(item)) {
+              return ;
+            }
             altId++;
             alternativeItemSet.set(item, 0);
             alternativeItemSet.forEach( function (key, value) {
@@ -629,6 +747,9 @@ var itemExplorerChart = function(_myData) {
 	      }
 	      else {
           if (!(null === alternativeItemSet)) {
+            if (!checkAlternativeSelectionWithinGroup(item)) {
+              return ;
+            }
             altId++;
             alternativeItemSet.set(item, 1);
             alternativeItemSet.forEach( function (key, value) {
