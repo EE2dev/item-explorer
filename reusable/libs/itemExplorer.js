@@ -37,29 +37,7 @@ var itemExplorerChart = function(_myData) {
         var mean = ((points[0][0] + points[1][0]) / 2);
         return points.join("q " + mean + "," + controlPointY +" ");})
       .x(function(d) { return d.x})
-      .y(function(d) { return d.y});      
-    
-    var getArcPositions = function (itemFrom, itemTo, xScale) {
-      return [{x: 0, y: 25}, 
-        {x: xScale(mapItemToItemShort(itemTo)) - xScale(mapItemToItemShort(itemFrom)), y: 0}];
-    }
-    
-    var getArcMap = function (items, _xScale) {
-      var arcs = d3.map();
-        if (items.length === 1) {
-         arcs.set(items[0], [{x: 0, y: 25}, {x: 0, y: 0}]);
-         return arcs;
-      }    
-      items.sort(function(a, b) {
-        return d3.ascending(_xScale(mapItemToItemShort(a)), _xScale(mapItemToItemShort(b)));
-      });
-      items.forEach(function(d, i, arr) {
-        if (i < arr.length-1) {
-          arcs.set(d, getArcPositions(arr[i], arr[i+1],_xScale));
-        }
-      });
-      return arcs;
-    }
+      .y(function(d) { return d.y});          
     
     // 0.0 functions for external access
     function IEChart(selection) {
@@ -157,9 +135,13 @@ var itemExplorerChart = function(_myData) {
         var xAxis;
         var groupArea;
         
+        d3.select("g.padding").append("g")
+          .attr("class", "allTooltips");
+        
         groupMap.forEach(function (groupName, groupProperties){
-          groupArea = d3.select("g.padding").append("g")
-            .attr("class", "groupBlock group" + groupName)
+          // new: datum(groupName) --> datum(groupProperties)
+          groupArea = d3.select("g.padding").datum(groupProperties).insert("g", "g.allTooltips")
+            .attr("class", "groupBlock group" + groupName);
            // .attr("transform", "translate("+ counter * 167 + ", 0)"); 
           
           groupArea.append("g")
@@ -178,6 +160,7 @@ var itemExplorerChart = function(_myData) {
           }
           counter++;
         });  
+        // renderToolTips();
         // render(true);   
       });
     } 
@@ -288,6 +271,7 @@ var itemExplorerChart = function(_myData) {
             items: [itemObject],
             data: [],
             selector: "g.group"+group,
+            translate: 0,
             width: -1,
             xScale: null, // the scale
             axis: null,
@@ -299,12 +283,15 @@ var itemExplorerChart = function(_myData) {
     
     // 1.7 helper processing function for adding remaining properties for distinct groups
     function finishGroupProperties(numberOfItems) {
+      var translateTemp = 0;
       groupMap.forEach(function (groupName, groupProperties){
         var newGroupProperties = groupProperties;
         newGroupProperties.width = width * groupProperties.items.length / numberOfItems;
         newGroupProperties.xScale = d3.scale.ordinal()
           .domain(newGroupProperties.items).rangeRoundBands([0, newGroupProperties.width], .1);
         newGroupProperties.axis = d3.svg.axis().scale(newGroupProperties.xScale).orient("bottom");
+        newGroupProperties.translate = translateTemp;
+        translateTemp += newGroupProperties.width;
 
         groupMap.set(groupName, newGroupProperties);
       });  
@@ -357,15 +344,21 @@ var itemExplorerChart = function(_myData) {
         .attr("height", 0)
         .style("fill", function(d) { return d.color;});
       
-      var selArea = drawingArea.selectAll("g.gtooltip")
-        .data(group.data)
+         // var selArea = drawingArea.selectAll("g.gtooltip")
+      var selArea = d3.select("g.allTooltips").selectAll("g.gtooltip")
+        .data(group.data, function (d) { return d.itemShort;})
         .enter()
         .append("g")
         .attr("class", "gtooltip");
 
       selArea.attr("transform", function (d) {
           var trans = d3.selectAll(".x>.tick").filter( function (da) { return da === d;}).attr("transform");
-          if (trans === trans.split(",")[0]) { // fix for IE
+          // var transGroup = d3.selectAll("g.groupBlock").filter( function (da) { 
+          //  return da === d;}).attr("transform");
+          // var transGroup = d3.selectAll("g.groupBlock").filter( function (da) { 
+          //  console.log(da.attr("class")); return da === d;}).attr("transform");
+          // console.log("transGroup : " + transGroup);
+          if (trans === trans.split(",")[0]) { // hack for IE: transform(x) 
           	trans = trans.substr(0, trans.length-1) + ", " + myHeight + ")";
           }
           else {
@@ -401,8 +394,19 @@ var itemExplorerChart = function(_myData) {
             updateSelection(d.item);
           }
         });   
-        makeUnselectableForOtherBrowsers();   
+      makeUnselectableForOtherBrowsers();   
     }
+    
+    // give number
+    /*
+    function adjustTranslationForToolTips() {
+      var groupTrans = d3.map();
+      var trans;
+      d3.selectAll("g.groupBlock").each(function (d) {
+         groupTrans.set(d, this.attr("transform")).split(",")[0];
+      });
+    }
+    */
     
     // 2.2. displaying bars for current selection
     function render(reselectData, group) {
@@ -433,10 +437,10 @@ var itemExplorerChart = function(_myData) {
       }
       group.data = data.filter(function (d) {return (group.items.indexOf(d.itemShort) !== -1);});
       
+      var transition = d3.select("svg").transition().duration(750);
       if (group.firstTime) {
         maxFrequencyOfInitialItems = d3.max(data, function(d) { return d.frequency; });
         renderFirstTime(group);
-        group.firstTime = false;
         /*
         console.log("1 - Hase");
         console.log(groupMap.get("Hase"));
@@ -444,6 +448,14 @@ var itemExplorerChart = function(_myData) {
         console.log(groupMap.get(""));
         */
         // console.timeEnd("Time for data loading");
+        /*
+        transition.selectAll(".groupBlock").attr("transform",     
+          function(d,i) { return "translate("+ i * 167 + ", 0)"; 
+        }); */
+        transition.selectAll(".groupBlock").attr("transform",     
+          function(d,i) { return "translate("+ d.translate + ", 0)"; 
+        });
+        group.firstTime = false;
       }
       
       maxFrequencyOfCurrentItems = (document.getElementById('update_axis').checked) ?
@@ -453,11 +465,7 @@ var itemExplorerChart = function(_myData) {
       updateBars();
       showPatterns();
       
-      var transition = d3.select("svg").transition().duration(750);
       transition.selectAll(".y.axis").call(yAxis);
-      transition.selectAll(".groupBlock").attr("transform",
-        function(d,i) { return "translate("+ i * 167 + ", 0)"; 
-        });
         
       var transBars = transition.selectAll(".bar.drawn")
         .attr("y", function(d) { return -(myHeight - y(d.frequency)); })
@@ -469,7 +477,7 @@ var itemExplorerChart = function(_myData) {
         });     
     }
         
-    // 2.4 tooltip. argument is d - data of the corresponding bar
+    // 2.3 tooltip. argument is d - data of the corresponding bar
     function showTooltipFor (d) {
       var tooltipHeight = 41;
       var tooltipWidth;
@@ -521,7 +529,7 @@ var itemExplorerChart = function(_myData) {
         .style("stroke", rgbString);      
     }
     
-    // 2.5 callback for when all transitions are finished, called at the end of function 2.2 render(reselectData)
+    // 2.4 helper function: callback for when all transitions are finished, called at the end of function 2.2 render(reselectData)
     function endAll (transition, callback) {
       var n;
 
@@ -573,118 +581,8 @@ var itemExplorerChart = function(_myData) {
       }
       return ret;  
     }
-    
-    //4.1. process OR selection for given item
-    function updateAlternativeSelection(item) {
-      if (selectedItemSet.has(item)) {
-        return;
-      }
-      if (null === alternativeItemSet) {
-        alternativeItemSet = d3.map();
-      }
-      // just allow alternative selections within a group
-      if (!checkAlternativeSelectionWithinGroup(item)) {
-        return ;
-      }
-      
-      if (d3.event.shiftKey) {
-        if (alternativeItemSet.has(item)) {
-          alternativeItemSet.remove(item);
-          d3.selectAll(".indicator")
-            .filter(function (d) { return d.item === item;})
-            .style("fill", "none")
-            .style("opacity", 0);
-        }
-        else {
-          alternativeItemSet.set(item, 0);
-        }
-      }
-      else {
-        if (alternativeItemSet.has(item)) {
-          alternativeItemSet.remove(item);
-          d3.selectAll(".indicator")
-            .filter(function (d) { return d.item === item;})
-            .style("fill", "none")
-            .style("opacity", 0);
-        }
-        else {
-          alternativeItemSet.set(item, 1);
-        }
-      }     
-      altArcMap = getArcMap(alternativeItemSet.keys(), groupMap.get(alternativeItemSet.group).xScale );
-      drawArcs(false, altId + 1);      
 
-      d3.selectAll(".indicator")
-        .each(function (d) { if (alternativeItemSet.has(d.item)) {
-          d3.select(this).select(".colorIndicator").style("fill", 
-            function(d) { return (alternativeItemSet.get(d.item) === 1) ? "green": "red";})
-            .style("opacity", 0.5); 
-        }
-      });
- 
-      if (alternativeItemSet.empty()) {
-        alternativeItemSet = null;
-      }
-    }
-    
-    // 4.2. check if alternative selection is within group
-    function checkAlternativeSelectionWithinGroup(item) {
-      if (!alternativeItemSet.empty()) {
-        var oneAlternativeItem = alternativeItemSet.keys()[0]; 
-        var currentGroup;        
-        
-        if (typeof alternativeItemSet.group === 'undefined') {
-          data.forEach(function(_item) {
-            if (_item.item === oneAlternativeItem) {
-              // setting the group and the scale for the alt arcs
-              alternativeItemSet.group = _item.group;
-            }
-            if (_item.item === item) {
-              currentGroup = _item.group;
-            }
-          });
-        }
-        else {
-          data.forEach(function(_item) {
-            if (_item.item === item) {
-              currentGroup = _item.group;
-            }
-          });  
-        }
-        console.log("currentGroup: " + currentGroup);
-        console.log("relevantGroup: " + alternativeItemSet.group);
-        return (currentGroup === alternativeItemSet.group);
-      }
-      else {
-        data.forEach(function(_item) {
-            if (_item.item === item) {
-              alternativeItemSet.group = _item.group;
-            }
-          });  
-        return true;
-      }
-    }
-    
-    //4.3. display arcs for OR Selection altArcId
-    function drawArcs(altSelectionFinished, altArcId) {
-      // var aId = altSelectionFinished ? altId : (altId + 1);
-      var aId = altArcId;
-      d3.selectAll('.altIndicator').selectAll("path.line.altId"+(aId)).remove();     
-      d3.selectAll('.altIndicator')
-        .filter(function(d) {
-          return altArcMap.has(d.item);})
-        .append("path")
-        .attr("class", function (d) { return "line altId"+(aId);})
-        .attr("d", function(d) {return altArc(altArcMap.get(d.item));})
-        .style("opacity", 0.5)
-        .style("stroke-width", function (d) { 
-          return altSelectionFinished ? 3 : 2;})
-        .style("stroke-dasharray", function (d) { 
-          return altSelectionFinished ? "" : "2,2";});
-    }
-    
-    
-    //5.1 process (regular) selection for given item
+    //4.1 process (regular) selection for given item
     function updateSelection(item) {
       if (!(null === alternativeItemSet)) {
         if (alternativeItemSet.has(item) || selectedItemSet.has(item)) {
@@ -750,6 +648,97 @@ var itemExplorerChart = function(_myData) {
       data.forEach(function (element){ element.frequency = 0;});
       render(true);
     }
+    
+    //5.1. process OR selection for given item
+    function updateAlternativeSelection(item) {
+      if (selectedItemSet.has(item)) {
+        return;
+      }
+      if (null === alternativeItemSet) {
+        alternativeItemSet = d3.map();
+      }
+      // just allow alternative selections within a group
+      if (!checkAlternativeSelectionWithinGroup(item)) {
+        return ;
+      }
+      
+      if (d3.event.shiftKey) {
+        if (alternativeItemSet.has(item)) {
+          alternativeItemSet.remove(item);
+          d3.selectAll(".indicator")
+            .filter(function (d) { return d.item === item;})
+            .style("fill", "none")
+            .style("opacity", 0);
+        }
+        else {
+          alternativeItemSet.set(item, 0);
+        }
+      }
+      else {
+        if (alternativeItemSet.has(item)) {
+          alternativeItemSet.remove(item);
+          d3.selectAll(".indicator")
+            .filter(function (d) { return d.item === item;})
+            .style("fill", "none")
+            .style("opacity", 0);
+        }
+        else {
+          alternativeItemSet.set(item, 1);
+        }
+      }     
+      altArcMap = getArcMap(alternativeItemSet.keys(), groupMap.get(alternativeItemSet.group).xScale );
+      drawArcs(false, altId + 1);      
+
+      d3.selectAll(".indicator")
+        .each(function (d) { if (alternativeItemSet.has(d.item)) {
+          d3.select(this).select(".colorIndicator").style("fill", 
+            function(d) { return (alternativeItemSet.get(d.item) === 1) ? "green": "red";})
+            .style("opacity", 0.5); 
+        }
+      });
+ 
+      if (alternativeItemSet.empty()) {
+        alternativeItemSet = null;
+      }
+    }
+    
+    // 5.2. check if alternative selection is within group
+    function checkAlternativeSelectionWithinGroup(item) {
+      if (!alternativeItemSet.empty()) {
+        var oneAlternativeItem = alternativeItemSet.keys()[0]; 
+        var currentGroup;        
+        
+        if (typeof alternativeItemSet.group === 'undefined') {
+          data.forEach(function(_item) {
+            if (_item.item === oneAlternativeItem) {
+              // setting the group and the scale for the alt arcs
+              alternativeItemSet.group = _item.group;
+            }
+            if (_item.item === item) {
+              currentGroup = _item.group;
+            }
+          });
+        }
+        else {
+          data.forEach(function(_item) {
+            if (_item.item === item) {
+              currentGroup = _item.group;
+            }
+          });  
+        }
+        console.log("currentGroup: " + currentGroup);
+        console.log("relevantGroup: " + alternativeItemSet.group);
+        return (currentGroup === alternativeItemSet.group);
+      }
+      else {
+        data.forEach(function(_item) {
+            if (_item.item === item) {
+              alternativeItemSet.group = _item.group;
+            }
+          });  
+        return true;
+      }
+    }       
     
     //6.1. update display of item selections and item OR selections in bar chart. Also calls function 6.2
     function updateBars() {
@@ -822,36 +811,23 @@ var itemExplorerChart = function(_myData) {
       }
     }
     
-    //7.1. update bar chart with new sorting order
-    function sortItems() {
-      var sortByFreq = document.getElementById('sort').checked;
-      
-      groupMap.forEach(function (group, gProperties) {
-        var data_sorted = gProperties.data.slice();
-        gProperties.xScale = gProperties.xScale.domain(data_sorted.sort((sortByFreq)
-            ? function(a, b) { return b.frequency - a.frequency; }
-            : function(a, b) { return d3.ascending(a.index, b.index); })
-            .map(function(d) { return d.itemShort; }));
-            
-        var transition = d3.select(gProperties.selector).transition().duration(750),
-            delay = function(d, i) { return i * 50; };
-            
-        transition.selectAll(".x>.tick")
-          .delay(delay)
-          .attr("transform", function(d) {
-            return "translate(" + (gProperties.xScale(d.itemShort) + gProperties.xScale.rangeBand()/2) + ",0)";
-          });
-        d3.select(gProperties.selector).selectAll(".gtooltip").attr("transform", function(d) {
-            return "translate(" + (gProperties.xScale(d.itemShort) + gProperties.xScale.rangeBand()/2) + ", " + myHeight +")";
-          });
-      });  
-        
-      listOfAlternativeItemSets.forEach(function(key, value) {
-        redrawArcs(true, key, value);
-      }); 
-      if (null !== alternativeItemSet) {
-      redrawArcs(false, altId + 1, alternativeItemSet);
-      }
+    // 7 functions for displaying arcs for alternative selections
+    //7.1. Displays arcs for OR Selection altArcId
+    function drawArcs(altSelectionFinished, altArcId) {
+      // var aId = altSelectionFinished ? altId : (altId + 1);
+      var aId = altArcId;
+      d3.selectAll('.altIndicator').selectAll("path.line.altId"+(aId)).remove();     
+      d3.selectAll('.altIndicator')
+        .filter(function(d) {
+          return altArcMap.has(d.item);})
+        .append("path")
+        .attr("class", function (d) { return "line altId"+(aId);})
+        .attr("d", function(d) {return altArc(altArcMap.get(d.item));})
+        .style("opacity", 0.5)
+        .style("stroke-width", function (d) { 
+          return altSelectionFinished ? 3 : 2;})
+        .style("stroke-dasharray", function (d) { 
+          return altSelectionFinished ? "" : "2,2";});
     }
     
     //7.2. Arcs for OR Selections have to be recomputed after resorting
@@ -899,6 +875,30 @@ var itemExplorerChart = function(_myData) {
       .transition().delay(delay2).duration(750)
       .style("opacity", 0)
       .remove();      
+    }
+    
+    //7.3. Helper function for arc selections   
+    function getArcPositions(itemFrom, itemTo, xScale) {
+      return [{x: 0, y: 25}, 
+        {x: xScale(mapItemToItemShort(itemTo)) - xScale(mapItemToItemShort(itemFrom)), y: 0}];
+    }
+    
+    //7.4. Helper function for arc selections: @returns arc map for corresponding items and scale 
+    function getArcMap(items, _xScale) {
+      var arcs = d3.map();
+        if (items.length === 1) {
+         arcs.set(items[0], [{x: 0, y: 25}, {x: 0, y: 0}]);
+         return arcs;
+      }    
+      items.sort(function(a, b) {
+        return d3.ascending(_xScale(mapItemToItemShort(a)), _xScale(mapItemToItemShort(b)));
+      });
+      items.forEach(function(d, i, arr) {
+        if (i < arr.length-1) {
+          arcs.set(d, getArcPositions(arr[i], arr[i+1],_xScale));
+        }
+      });
+      return arcs;
     }
     
     //8.1. function 1 for computing frequent 2-item set
@@ -965,7 +965,39 @@ var itemExplorerChart = function(_myData) {
       }
     }
     
-    //9.1. display help rectangle after "mouseover" event
+    //9.1. update bar chart with new sorting order
+    function sortItems() {
+      var sortByFreq = document.getElementById('sort').checked;
+      
+      groupMap.forEach(function (group, gProperties) {
+        var data_sorted = gProperties.data.slice();
+        gProperties.xScale = gProperties.xScale.domain(data_sorted.sort((sortByFreq)
+            ? function(a, b) { return b.frequency - a.frequency; }
+            : function(a, b) { return d3.ascending(a.index, b.index); })
+            .map(function(d) { return d.itemShort; }));
+            
+        var transition = d3.select(gProperties.selector).transition().duration(750),
+            delay = function(d, i) { return i * 50; };
+            
+        transition.selectAll(".x>.tick")
+          .delay(delay)
+          .attr("transform", function(d) {
+            return "translate(" + (gProperties.xScale(d.itemShort) + gProperties.xScale.rangeBand()/2) + ",0)";
+          });
+        d3.select(gProperties.selector).selectAll(".gtooltip").attr("transform", function(d) {
+            return "translate(" + (gProperties.xScale(d.itemShort) + gProperties.xScale.rangeBand()/2) + ", " + myHeight +")";
+          });
+      });  
+        
+      listOfAlternativeItemSets.forEach(function(key, value) {
+        redrawArcs(true, key, value);
+      }); 
+      if (null !== alternativeItemSet) {
+      redrawArcs(false, altId + 1, alternativeItemSet);
+      }
+    }
+    
+    //10.1. display help rectangle after "mouseover" event
     function showHelp() {
       console.log("show help");
       var top = 5-margin.top-padding.top;
@@ -1023,7 +1055,7 @@ var itemExplorerChart = function(_myData) {
       });
     }
     
-    //9.2. remove help rectangle after "mouseout" event
+    //10.2. remove help rectangle after "mouseout" event
     function removeHelp() {
       console.log("remove help");
       d3.select("svg.IEChart").selectAll(".helpBox").remove();
@@ -1032,7 +1064,7 @@ var itemExplorerChart = function(_myData) {
         .style("border", "1px solid darkgrey");
     }
        
-    //10.1. helper for displaying decimal point for frequency and percent with German convention
+    //11.1. helper for displaying decimal point for frequency and percent with German convention
     function formatNumber(str) {
       if (+str % 1 !== 0)
         return str.split(".").join(",");
@@ -1041,7 +1073,7 @@ var itemExplorerChart = function(_myData) {
       return newStr;
     }
     
-    //10.2. helper for create a light shade of a color - used for tooltip box background
+    //11.2. helper for create a light shade of a color - used for tooltip box background
     function lighterRGB(oldRGB) {
       oldRGB = oldRGB.substring(4, oldRGB.length-1);
       var newRGB = oldRGB.split(",");
@@ -1054,7 +1086,7 @@ var itemExplorerChart = function(_myData) {
       return "rgb(" + newRGB[0] + ", " + newRGB[1] + ", " + newRGB[2] +")";
     }
     
-    //10.3. shim for IE, Opera
+    //11.3. shim for IE, Opera
     function makeUnselectableForOtherBrowsers() {
     	d3.selectAll(".x.axis g.tick>text").attr("unselectable", "on");
     	d3.selectAll(".y.axis g.tick>text").attr("unselectable", "on");
