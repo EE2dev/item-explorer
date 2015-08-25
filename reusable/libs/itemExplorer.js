@@ -153,10 +153,10 @@ var itemExplorerChart = function(_myData) {
           
           // currentGroupSelector = "g.group"+group;
           if (counter === 0) {
-            render(true, groupProperties);
+            render(true, groupName);
           }
           else {
-            render(false, groupProperties);
+            render(false, groupName);
           }
           counter++;
         });  
@@ -298,10 +298,10 @@ var itemExplorerChart = function(_myData) {
     }
     
     // 2.1. setting up the main display
-    function renderFirstTime(group) {
+    function renderFirstTime(groupProperties) {
       y.domain([0, maxFrequencyOfInitialItems]);      
       
-      var drawingArea = d3.select(group.selector);
+      var drawingArea = d3.select(groupProperties.selector);
       
       drawingArea.append("g")
       .attr("class", "y axis")
@@ -312,7 +312,7 @@ var itemExplorerChart = function(_myData) {
       .style("text-anchor", "end")
       .text(frequencyName.slice(1, frequencyName.length));
       
-      var bars = drawingArea.selectAll(".x>.tick").data(group.data);
+      var bars = drawingArea.selectAll(".x>.tick").data(groupProperties.data);
       var indicator = drawingArea.select(".x.axis").selectAll('g.tick')
         .append('g')
         .attr('class', 'indicator')
@@ -321,9 +321,9 @@ var itemExplorerChart = function(_myData) {
       
       indicator.append('rect')
         .attr('class', 'colorIndicator')
-        .attr('x', (group.xScale.rangeBand()/2) * -1)
+        .attr('x', (groupProperties.xScale.rangeBand()/2) * -1)
         .attr('y', 0)
-        .attr('width', group.xScale.rangeBand())
+        .attr('width', groupProperties.xScale.rangeBand())
         .attr('height', 25)
         .style("stroke","black")
         .style("stroke-width", 2)
@@ -338,15 +338,18 @@ var itemExplorerChart = function(_myData) {
       // var bars = d3.selectAll(".x>.tick").data(data);
       bars.append("rect")
         .attr("class", "bar drawn")
-        .attr("x", -group.xScale.rangeBand()/2)
-        .attr("width", group.xScale.rangeBand())
+        .attr("x", -groupProperties.xScale.rangeBand()/2)
+        .attr("width", groupProperties.xScale.rangeBand())
         .attr("y", 0)
         .attr("height", 0)
         .style("fill", function(d) { return d.color;});
       
          // var selArea = drawingArea.selectAll("g.gtooltip")
-      var selArea = d3.select("g.allTooltips").selectAll("g.gtooltip")
-        .data(group.data, function (d) { return d.itemShort;})
+      var groupName = groupProperties.selector.split("g.")[1];   
+      var selArea = d3.select("g.allTooltips")
+        .append("g").attr("class", "toolTipTrans " + groupName).datum(groupProperties)
+        .selectAll("g.gtooltip")
+        .data(groupProperties.data, function (d) { return d.itemShort;})
         .enter()
         .append("g")
         .attr("class", "gtooltip");
@@ -374,8 +377,8 @@ var itemExplorerChart = function(_myData) {
       
       selArea.append("rect")
         .attr("class", "selection bar unselect")
-        .attr("x", -group.xScale.rangeBand()/2)
-        .attr("width", group.xScale.rangeBand())
+        .attr("x", -groupProperties.xScale.rangeBand()/2)
+        .attr("width", groupProperties.xScale.rangeBand())
         .attr("y", function(d) { return -(myHeight - y(maxFrequencyOfInitialItems)); })
         .attr("height", myHeight + 20 - y(maxFrequencyOfInitialItems))
         .on("mouseover", function(d) {
@@ -410,13 +413,18 @@ var itemExplorerChart = function(_myData) {
     
     // 2.2. displaying bars for current selection
     function render(reselectData, group) {
+      var groupProperties;
       if (typeof group === 'undefined') {
-        group = {
+        groupProperties = {
             items: [],
             data: data,
             selector: "g.group"
           };
       }
+      else {
+        groupProperties = groupMap.get(group);
+      }
+      
       if (reselectData) {
       	currentFrequencyTotal = 0;
         initializeFrequentItems();
@@ -435,12 +443,14 @@ var itemExplorerChart = function(_myData) {
           }
         })
       }
-      group.data = data.filter(function (d) {return (group.items.indexOf(d.itemShort) !== -1);});
+      groupProperties.data = data.filter(function (d) {return (groupProperties.items.indexOf(d.itemShort) !== -1);});
       
       var transition = d3.select("svg").transition().duration(750);
-      if (group.firstTime) {
+      
+      if (firstTime) {
+      // if (groupProperties.firstTime) {
         maxFrequencyOfInitialItems = d3.max(data, function(d) { return d.frequency; });
-        renderFirstTime(group);
+        renderFirstTime(groupProperties);
         /*
         console.log("1 - Hase");
         console.log(groupMap.get("Hase"));
@@ -452,10 +462,29 @@ var itemExplorerChart = function(_myData) {
         transition.selectAll(".groupBlock").attr("transform",     
           function(d,i) { return "translate("+ i * 167 + ", 0)"; 
         }); */
-        transition.selectAll(".groupBlock").attr("transform",     
-          function(d,i) { return "translate("+ d.translate + ", 0)"; 
+
+        groupProperties.firstTime = false;
+        groupMap.set(group, groupProperties);
+        
+        var finished = false;
+        groupMap.forEach(function (groupName, groupProperties){
+          finished = finished || groupProperties.firstTime;
         });
-        group.firstTime = false;
+        firstTime = finished;
+        
+        if (firstTime === false) {
+          var xTrans = 0;
+          var gap = 10;
+          transition.selectAll(".groupBlock").attr("transform",     
+            // function(d,i) { return "translate("+ d.translate + ", 0)"; 
+            function(d,i) { 
+              var trans = xTrans;
+              xTrans += this.getBBox().width + gap;
+              var transString = "translate("+ trans + ", 0)"; 
+              d3.selectAll("g.toolTipTrans").filter( function (da) { return da === d;}).attr("transform", transString);
+              return transString; 
+            });
+        }
       }
       
       maxFrequencyOfCurrentItems = (document.getElementById('update_axis').checked) ?
@@ -529,7 +558,7 @@ var itemExplorerChart = function(_myData) {
         .style("stroke", rgbString);      
     }
     
-    // 2.4 helper function: callback for when all transitions are finished, called at the end of function 2.2 render(reselectData)
+    // 2.4 helper function: callback for when all transitions are finished, called at the end of function 2.2 render(reselectData, group)
     function endAll (transition, callback) {
       var n;
 
@@ -984,7 +1013,10 @@ var itemExplorerChart = function(_myData) {
           .attr("transform", function(d) {
             return "translate(" + (gProperties.xScale(d.itemShort) + gProperties.xScale.rangeBand()/2) + ",0)";
           });
-        d3.select(gProperties.selector).selectAll(".gtooltip").attr("transform", function(d) {
+          
+        // d3.select(gProperties.selector).selectAll(".gtooltip").attr("transform", function(d) {
+        d3.selectAll("g.toolTipTrans").filter( function (d) { return d === gProperties;})
+          .selectAll(".gtooltip").attr("transform", function(d) {
             return "translate(" + (gProperties.xScale(d.itemShort) + gProperties.xScale.rangeBand()/2) + ", " + myHeight +")";
           });
       });  
