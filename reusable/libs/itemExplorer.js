@@ -17,6 +17,8 @@ var itemExplorerChart = function(_myData) {
     var frequentItemOne = [];
     var frequencyName;
     var chart;
+    var barWidth = 38;
+    var barHeight = 340;
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
@@ -65,7 +67,23 @@ var itemExplorerChart = function(_myData) {
       }
       file = _myData;
       return IEChart;      
-    }    
+    }
+
+    IEChart.barWidth = function (_barWidth) {
+      if (!arguments.length) {
+        return barWidth;
+      }
+      barWidth = _barWidth;
+      return IEChart;      
+    }
+    
+    IEChart.barHeight = function (_barHeight) {
+      if (!arguments.length) {
+        return myHeight;
+      }
+      myHeight = _barHeight;
+      return IEChart;      
+    }      
     
     IEChart.update = function() {
       render(false);
@@ -271,7 +289,7 @@ var itemExplorerChart = function(_myData) {
             items: [itemObject],
             data: [],
             selector: "g.group"+group,
-            translate: 0,
+            // translate: 0,
             width: -1,
             xScale: null, // the scale
             axis: null,
@@ -281,17 +299,18 @@ var itemExplorerChart = function(_myData) {
       groupMap.set(group, groupProperties);
     }    
     
-    // 1.7 helper processing function for adding remaining properties for distinct groups
+    // 1.8 helper processing function for adding remaining properties for distinct groups
     function finishGroupProperties(numberOfItems) {
-      var translateTemp = 0;
+      // var translateTemp = 0;
       groupMap.forEach(function (groupName, groupProperties){
         var newGroupProperties = groupProperties;
-        newGroupProperties.width = width * groupProperties.items.length / numberOfItems;
+        // newGroupProperties.width = width * groupProperties.items.length / numberOfItems;
+        newGroupProperties.width = groupProperties.items.length * barWidth;
         newGroupProperties.xScale = d3.scale.ordinal()
           .domain(newGroupProperties.items).rangeRoundBands([0, newGroupProperties.width], .1);
         newGroupProperties.axis = d3.svg.axis().scale(newGroupProperties.xScale).orient("bottom");
-        newGroupProperties.translate = translateTemp;
-        translateTemp += newGroupProperties.width;
+        // newGroupProperties.translate = translateTemp;
+        // translateTemp += newGroupProperties.width;
 
         groupMap.set(groupName, newGroupProperties);
       });  
@@ -400,17 +419,6 @@ var itemExplorerChart = function(_myData) {
       makeUnselectableForOtherBrowsers();   
     }
     
-    // give number
-    /*
-    function adjustTranslationForToolTips() {
-      var groupTrans = d3.map();
-      var trans;
-      d3.selectAll("g.groupBlock").each(function (d) {
-         groupTrans.set(d, this.attr("transform")).split(",")[0];
-      });
-    }
-    */
-    
     // 2.2. displaying bars for current selection
     function render(reselectData, group) {
       var groupProperties;
@@ -448,20 +456,8 @@ var itemExplorerChart = function(_myData) {
       var transition = d3.select("svg").transition().duration(750);
       
       if (firstTime) {
-      // if (groupProperties.firstTime) {
         maxFrequencyOfInitialItems = d3.max(data, function(d) { return d.frequency; });
         renderFirstTime(groupProperties);
-        /*
-        console.log("1 - Hase");
-        console.log(groupMap.get("Hase"));
-        console.log("2 - ");
-        console.log(groupMap.get(""));
-        */
-        // console.timeEnd("Time for data loading");
-        /*
-        transition.selectAll(".groupBlock").attr("transform",     
-          function(d,i) { return "translate("+ i * 167 + ", 0)"; 
-        }); */
 
         groupProperties.firstTime = false;
         groupMap.set(group, groupProperties);
@@ -474,16 +470,27 @@ var itemExplorerChart = function(_myData) {
         
         if (firstTime === false) {
           var xTrans = 0;
-          var gap = 10;
+          var xShift = 0;
+          var gap = 15;
           transition.selectAll(".groupBlock").attr("transform",     
-            // function(d,i) { return "translate("+ d.translate + ", 0)"; 
             function(d,i) { 
               var trans = xTrans;
-              xTrans += this.getBBox().width + gap;
+              // Fix for IE, since the following doesn't work in IE: xTrans += this.getBBox().width + gap;
+              xShift = d3.select(this).select("g.x.axis").node().getBBox().width 
+                + d3.select(this).select("g.y.axis").node().getBBox().width;
+              xTrans += xShift + gap;
+              // 1 xTrans += this.getBBox().height + gap;
+              console.log("this.getBBox().width: " + this.getBBox().width);
+              console.log("xShift: " + xShift);
+              console.log("xTrans: " + xTrans);
               var transString = "translate("+ trans + ", 0)"; 
+              // 2 var transString = "translate(0, "+ trans + ")"; 
               d3.selectAll("g.toolTipTrans").filter( function (da) { return da === d;}).attr("transform", transString);
               return transString; 
             });
+          // Verschiebung anpassen
+          d3.select("svg.IEChart").attr("width", xTrans + padding.left);  
+          // 3 d3.select("svg.IEChart").attr("height", xTrans + padding.top); 
         }
       }
       
