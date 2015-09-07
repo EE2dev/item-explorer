@@ -19,6 +19,8 @@ var itemExplorerChart = function(_myData) {
     var chart;
     var barWidth = 38;
     var barHeight = 340;
+    var svgLeft; 
+    var svgRight;
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
@@ -489,8 +491,11 @@ var itemExplorerChart = function(_myData) {
               return transString; 
             });
           // Verschiebung anpassen
-          d3.select("svg.IEChart").attr("width", xTrans + padding.left);  
+          var svgSel = d3.select("svg.IEChart");
+          svgSel.attr("width", xTrans + padding.left);  
           // 3 d3.select("svg.IEChart").attr("height", xTrans + padding.top); 
+          svgLeft = svgSel.node().getBoundingClientRect().left;
+          svgRight = svgSel.node().getBoundingClientRect().right;
         }
       }
       
@@ -529,7 +534,7 @@ var itemExplorerChart = function(_myData) {
       
       textSel.append("text")
         .attr("class", "tooltip firstLine")
-        .attr("x", 0)
+        .attr("x", 0) // a11
         .attr("y", topY + 5)
         .attr("dy", ".71em")
         .attr("fill", "black")
@@ -538,7 +543,7 @@ var itemExplorerChart = function(_myData) {
         
       textSel.append("text")
         .attr("class", "tooltip secondLine")
-        .attr("x", 0)
+        .attr("x", 0)  // a12
         .attr("y", topY + 4 + 18)
         .attr("dy", ".71em")
         .attr("fill", "black")
@@ -551,13 +556,16 @@ var itemExplorerChart = function(_myData) {
       textBoxSel.insert("rect", ".tooltip.textgroup")
       // sel.insert("rect", "text.tooltip.firstLine")
         .attr("class", "tooltip box")
-        .attr("x", -tooltipWidth/2)
+        .attr("x", -tooltipWidth/2) // a12
         .attr("y", topY)
         .attr("width", tooltipWidth)
         .attr("height", tooltipHeight)
         .style("fill", lighterRGB(rgbString))
         .style("stroke", rgbString);
-              
+        
+      // check crossing edge of svg -> shift x attributes
+      checkTooltipClipped(textBoxSel);        
+      
       sel.insert("path", ".selection.bar")
         .attr("class", "tooltip triangle")
         .attr("d"," M 0 " + bottomY +"l -10 -10 l 20 0 l -10 10")
@@ -565,7 +573,29 @@ var itemExplorerChart = function(_myData) {
         .style("stroke", rgbString);      
     }
     
-    // 2.4 helper function: callback for when all transitions are finished, called at the end of function 2.2 render(reselectData, group)
+    // 2.4 helper function: tooltip translated if clipped
+    function checkTooltipClipped (sel) {
+      //var tooltipParent = d3.select(sel);
+      var selLeft = sel.node().getBoundingClientRect().left;
+      var selRight = sel.node().getBoundingClientRect().right;
+      if (selLeft < (svgLeft + 2)) {
+        selLeft = svgLeft + 2 - selLeft;
+        /*
+        if (selLeft < 0) {
+          selLeft *= -1;
+        }
+        selLeft += 10;  */
+        sel.attr("transform", "translate (" + selLeft +" ,0)");
+      } 
+      else {
+        if ((selRight + 2) > svgRight) {
+          selRight = svgRight - (selRight + 2);  
+          sel.attr("transform", "translate (" + selRight +" ,0)");
+        } 
+      }
+    }  
+    
+    // 2.5 helper function: callback for when all transitions are finished, called at the end of function 2.2 render(reselectData, group)
     function endAll (transition, callback) {
       var n;
 
