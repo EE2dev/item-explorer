@@ -21,6 +21,25 @@ var itemExplorerChart = function(_myData) {
     var barHeight = 340;
     var svgLeft; 
     var svgRight;
+    var y;    // y scale
+    var yAxis;
+    var tickFormat;
+    var decimalSeparator = ",";
+    var localeFormatter = d3.locale({
+                "decimal": ",",
+                "thousands": ".",
+                "grouping": [3],
+                "currency": ["", "€"],
+                "dateTime": "%a, %e %b %Y, %X",
+                "date": "%d.%m.%Y",
+                "time": "%H:%M:%S",
+                "periods": ["", ""],
+                "days": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+                "shortDays": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
+                "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+                "shortMonths": ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"]
+            });
+
 
     var margin = {top: 20, right: 20, bottom: 20, left: 20},
       padding = {top: 60, right: 60, bottom: 60, left: 70},
@@ -30,9 +49,11 @@ var itemExplorerChart = function(_myData) {
       myInnerHeight = myOuterHeight - margin.top - margin.bottom,
       width = myInnerWidth - padding.left - padding.right,
       myHeight = myInnerHeight - padding.top - padding.bottom;
-     
+      
+     /*
     var y = d3.scale.linear().range([myHeight, 0]);    
     var yAxis = d3.svg.axis().scale(y).orient("left");
+    */
 
     var controlPointY = 2 * (padding.bottom - 25) - 1;  
 
@@ -50,7 +71,9 @@ var itemExplorerChart = function(_myData) {
         readData(_myData, selection);
       } 
       else {
+        readData("<pre>", selection);
         // else if data is processed in html file
+        /*
         selection.each(function(data) {
           var div = d3.select(this);
           file = data; 
@@ -60,6 +83,7 @@ var itemExplorerChart = function(_myData) {
             .call(svgInit);
           initialSetup();  
         });
+        */
       }
     }
     
@@ -85,7 +109,17 @@ var itemExplorerChart = function(_myData) {
       }
       myHeight = _barHeight;
       return IEChart;      
-    }      
+    }
+    
+    IEChart.decimalSeparator = function (_decimalSeparator) {
+      decimalSeparator = _decimalSeparator;
+      return IEChart;      
+    }    
+    
+    IEChart.tickFormat = function (_tickFormat) {
+      tickFormat = _tickFormat;
+      return IEChart;      
+    }
     
     IEChart.update = function() {
       render(false);
@@ -146,7 +180,16 @@ var itemExplorerChart = function(_myData) {
         file = _file; 
         var items = parseFirstColumn(file);
         console.log(groupMap);
+        y = d3.scale.linear().range([myHeight, 0]); 
         
+        if (decimalSeparator === ",") {
+          yAxis = d3.svg.axis().scale(y).orient("left").ticks(10, tickFormat); //.innerTickSize(-width); 
+        }
+        else {// decimalSeparator === "." 
+        // yAxis = d3.svg.axis().scale(y).orient("left").ticks(10, localeFormatter.numberFormat(",.0f"));
+          tickFormat = (!tickFormat) ? ",.0f" : tickFormat;
+          yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(localeFormatter.numberFormat(tickFormat));
+        }
         var div = d3.select(this);
         chart = div.append("svg")
           .call(svgInit);
@@ -324,7 +367,8 @@ var itemExplorerChart = function(_myData) {
       
       var drawingArea = d3.select(groupProperties.selector);
       
-      drawingArea.append("g")
+      // drawingArea.append("g")
+      drawingArea.insert("g", "g.x.axis")
       .attr("class", "y axis")
       .append("text")
       .attr("x", -5)
@@ -349,13 +393,24 @@ var itemExplorerChart = function(_myData) {
         .style("stroke","black")
         .style("stroke-width", 2)
         .style("opacity", 0);
-         
+      
       indicator.append('g')
         .attr('class', 'altIndicator')
         .style("stroke","black")
         .style("stroke-width", 2)
         .style("opacity", 0.5);
-     
+      
+      // var rightBorder =  drawingArea.select("g.x.axis").node().getBBox().width;   
+      drawingArea.select("g.x.axis")
+        .append("text")
+        // .attr("x", rightBorder)
+        .attr("x", function(d) {return d.width;})
+        .attr("y", 25 + 3)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text(groupProperties.selector.split("g.")[1]);
+      // console.log("rBorder: "+ rightBorder);  
+      
       // var bars = d3.selectAll(".x>.tick").data(data);
       bars.append("rect")
         .attr("class", "bar drawn")
@@ -418,6 +473,7 @@ var itemExplorerChart = function(_myData) {
             updateSelection(d.item);
           }
         });   
+      drawingArea.select(".y.axis").call(yAxis);
       makeUnselectableForOtherBrowsers();   
     }
     
@@ -463,7 +519,7 @@ var itemExplorerChart = function(_myData) {
 
         groupProperties.firstTime = false;
         groupMap.set(group, groupProperties);
-        
+                
         var finished = false;
         groupMap.forEach(function (groupName, groupProperties){
           finished = finished || groupProperties.firstTime;
@@ -484,38 +540,89 @@ var itemExplorerChart = function(_myData) {
               // 1 xTrans += this.getBBox().height + gap;
               console.log("this.getBBox().width: " + this.getBBox().width);
               console.log("xShift: " + xShift);
+              console.log("xAxis: " + d3.select(this).select("g.x.axis").node().getBBox().width);
+              console.log("yAxis: " + d3.select(this).select("g.y.axis").node().getBBox().width);
               console.log("xTrans: " + xTrans);
               var transString = "translate("+ trans + ", 0)"; 
               // 2 var transString = "translate(0, "+ trans + ")"; 
               d3.selectAll("g.toolTipTrans").filter( function (da) { return da === d;}).attr("transform", transString);
               return transString; 
             });
-          // Verschiebung anpassen
+          // SVG anpassen
           var svgSel = d3.select("svg.IEChart");
           svgSel.attr("width", xTrans + padding.left);  
           // 3 d3.select("svg.IEChart").attr("height", xTrans + padding.top); 
+          // compute borders for efficient check when displaying tooltips
           svgLeft = svgSel.node().getBoundingClientRect().left;
           svgRight = svgSel.node().getBoundingClientRect().right;
+          svgSel.attr("height", myHeight + margin.top + padding.top + padding.bottom + margin.bottom);
+          
+          // add grid lines 
+          // error 1: d.width von der letzten Group !
+          // error 2: tick bei y = 0 geht zu weit nach links
+
+          /*
+          d3.selectAll(".y.axis").each (function (d) {
+          d3.select(this).call(yAxis.innerTickSize(-d.width).outerTickSize(0).tickPadding(20));
+          console.log("Data: ");
+          console.log(d3.select(this).node().__data__);
+          console.log(d.selector + "width: " +d.width);
+              });*/
+              
         }
       }
       
-      maxFrequencyOfCurrentItems = (document.getElementById('update_axis').checked) ?
-        d3.max(data, function(d) { return d.frequency; }) : maxFrequencyOfInitialItems;
-      y.domain([0, maxFrequencyOfCurrentItems]);
 
-      updateBars();
-      showPatterns();
-      
-      transition.selectAll(".y.axis").call(yAxis);
-        
-      var transBars = transition.selectAll(".bar.drawn")
-        .attr("y", function(d) { return -(myHeight - y(d.frequency)); })
-        .attr("height", function(d) { return myHeight - y(d.frequency); });
-      if (reselectData && (document.getElementById('sort').checked))  
-        transBars.call(endAll, function () {
-            // console.log("All the transitions have ended!");
-            sortItems();
-        });     
+      if (!firstTime) {  
+        maxFrequencyOfCurrentItems = (document.getElementById('update_axis').checked) ?
+          d3.max(data, function(d) { return d.frequency; }) : maxFrequencyOfInitialItems;
+        y.domain([0, maxFrequencyOfCurrentItems]);
+
+        updateBars();
+        showPatterns();
+           
+        transition.selectAll(".y.axis").call(yAxis);
+        // console.log("loops not needed");
+        var transBars = transition.selectAll(".bar.drawn")
+          .attr("y", function(d) { return -(myHeight - y(d.frequency)); })
+          .attr("height", function(d) { return myHeight - y(d.frequency); });
+        if (reselectData && (document.getElementById('sort').checked))  
+          transBars.call(endAll, function () {
+              // console.log("All the transitions have ended!");
+              sortItems();
+          });  
+          
+            
+            
+        // add grid lines
+
+          /*
+        d3.selectAll(".y.axis").each (function (d) {
+        d3.select(this).call(yAxis.innerTickSize(-d.width));
+        console.log(d.selector + "width: " +d.width);
+              });
+           */
+          
+        d3.selectAll(".y.axis").each(function (d) 
+          { var gWidth = d.width;
+            d3.select(this).selectAll("g.tick")
+            .filter(function (d) {console.log("gWidth: " + gWidth); return d !== 0})
+            .append("path")
+            .attr("class", "horizontalGrid")
+            .attr("d", "M 0 0 L " + gWidth + " 0")
+            /*
+            .append("line")
+              .attr(
+              {
+                  "class":"horizontalGrid",
+                  "x1" : 0,
+                  "x2" : gWidth,
+                  "y1" : 0,
+                  "y2" : 0,
+              })
+              */
+          });        
+      }
     }
         
     // 2.3 tooltip. argument is d - data of the corresponding bar
@@ -1135,14 +1242,27 @@ var itemExplorerChart = function(_myData) {
        
     //11.1. helper for displaying decimal point for frequency and percent with German convention
     function formatNumber(str) {
-      if (+str % 1 !== 0)
-        return str.split(".").join(",");
       var format = d3.format(",.0f");
-      var newStr = format(str).split(",").join(".");
-      return newStr;
-    }
+      if (decimalSeparator === ".") { // German convention
+        if (+str % 1 !== 0) {
+          return str.split(".").join(",");
+        }
+        else {
+          var newStr = format(str).split(",").join(".");
+          return newStr;
+        }
+      }
+      else {    // US convention
+        if (+str % 1 !== 0) { 
+          return str;
+        }
+        else {        
+          return format(str);
+        }
+      }
+    }      
     
-    //11.2. helper for create a light shade of a color - used for tooltip box background
+    //11.3. helper for create a light shade of a color - used for tooltip box background
     function lighterRGB(oldRGB) {
       oldRGB = oldRGB.substring(4, oldRGB.length-1);
       var newRGB = oldRGB.split(",");
@@ -1155,7 +1275,7 @@ var itemExplorerChart = function(_myData) {
       return "rgb(" + newRGB[0] + ", " + newRGB[1] + ", " + newRGB[2] +")";
     }
     
-    //11.3. shim for IE, Opera
+    //11.4. shim for IE, Opera
     function makeUnselectableForOtherBrowsers() {
     	d3.selectAll(".x.axis g.tick>text").attr("unselectable", "on");
     	d3.selectAll(".y.axis g.tick>text").attr("unselectable", "on");

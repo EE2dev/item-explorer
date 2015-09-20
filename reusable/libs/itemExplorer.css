@@ -13,18 +13,22 @@
     .axis {
       font: 10px sans-serif;
     }
-
+    
     .axis path,
     .axis line {
 	    fill: none;
 	    stroke: #000;
 	    shape-rendering: crispEdges;
     }
-
-    .x.axis > path {
-      display: none;
+    
+    path.horizontalGrid {
+      fill: none;
+	    stroke: lightGrey;
+      stroke-width : 1px;
+      stroke-dasharray: 1,1;
+	    shape-rendering: crispEdges;
     }
-
+    
     div.container{
     position: relative;
     float: left;
