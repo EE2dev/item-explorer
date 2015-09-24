@@ -2,7 +2,9 @@
 <meta charset="utf-8">
 <head>
   <link rel="stylesheet" type="text/css" href="libs/itemExplorer.css">
-  <script src="http://d3js.org/d3.v3.js"></script>
+  <!--<script src="http://d3js.org/d3.v3.js"></script>-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+  <script src="libs/itemExplorer.js"></script>
 </head>
 
 <body>
@@ -33,6 +35,7 @@ _customers,item1:LN=longitem1:GR=1,item2:LN=longitem2,item3:LN=longitem3:GR=5,it
 23,0,0,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0
 24,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </pre>
+<!--
 <div class="center">
   <div class="options container">
     <h3>Info</h3>
@@ -77,8 +80,8 @@ _customers,item1:LN=longitem1:GR=1,item2:LN=longitem2,item3:LN=longitem3:GR=5,it
     </div>
     <div class="interaction help">help</div>
   </div>
+  -->
 
-  <script src="libs/itemExplorer.js"></script>
   <script>  
     // option 1a: call IEChart by passing data. XHR is handled in itemExplorer.js
     // var myIEChart = itemExplorerChart("itemsLong.csv");
@@ -95,12 +98,14 @@ _customers,item1:LN=longitem1:GR=1,item2:LN=longitem2,item3:LN=longitem3:GR=5,it
         .attr("class", "chart")
         .datum(_file)
         .call(myIEChart);
-        
+      
+/*      
       d3.select("input#sort").on("click", myIEChart.resort);
       d3.select("input#update_axis").on("click", myIEChart.update);
       d3.select(".interaction.help")
         .on("mouseover", myIEChart.showHelp)
-          .on("mouseout", myIEChart.removeHelp);
+        .on("mouseout", myIEChart.removeHelp);
+          */
     }    
   </script>
 </body>
