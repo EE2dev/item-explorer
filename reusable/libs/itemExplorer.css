@@ -25,7 +25,6 @@
       fill: none;
 	    stroke: lightGrey;
       stroke-width : 1px;
-      stroke-dasharray: 1,1;
 	    shape-rendering: crispEdges;
     }
     
