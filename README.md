@@ -5,7 +5,6 @@ Supports column features.
 ### Examples
 
 One example is here.
-
 Complete list of examples:
 
 1. Data formatting:
