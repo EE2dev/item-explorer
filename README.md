@@ -23,6 +23,7 @@ Example for first line of csv file with column features:
 <h5>Supported column features:</h5>
 
 - `CO=`for specifying a color in rgb. E.g: `CO=rgb(70 130 180)`. Color can be used to denote certain items belonging together.
+- sdas
 - <code>LN=</code> for specifying a long name of an item. E.g: <code>LN=myLongItemName</code>
 - <code>DI=</code> for specifying a dimension. E.g: <code>DI=fruits</code>. 
 
