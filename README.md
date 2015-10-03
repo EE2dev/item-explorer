@@ -5,47 +5,27 @@ Supports column features.
 ### Examples
 
 One example is here.
-Other examples are:
 
-| topic  | example |
-| ------------- | ------------- |
-| data format  | basic data structure  |
-| data format  | added colors  |
-| data format  | added long names  |
-| data format  | added dimensions |
-| data format  | using all column features  |
-| including data | standard reference to csv file  |
-| including data | reference to csv file, with preprocessing |
-| including data | reference to data in `<pre>` tag  |
-| including data | reference to data in `<pre>` tag,  with preprocessing |
-| vis options | standard reference to csv file  |
-| vis options | standard reference to csv file  |
-| vis options | standard reference to csv file  |
-| vis options | standard reference to csv file  |
-| vis options | standard reference to csv file  |
-| vis options | standard reference to csv file  |
+Complete list of examples:
 
-List of Examples:
+1. Data formatting:
+  * basic data structure
+  * basic data structure with added colors
+  * basic data structure with long names
+  * basic data structure with dimensions
+  * basic data structure with all column features
 
-Data formatting:
----------------
-* basic data structure
-* basic data structure with added colors
-* basic data structure with long names
-* basic data structure with dimensions
-* basic data structure with all column features
+2. Including data
+  * standard reference to csv file
+  * preprocessing csv file before passing it to on
+  * reference to data embedded in html file
+  * preprocessing embedded data before passing it to on
 
-Including data
---------------
-* standard reference to csv file
-* preprocessing csv file before passing it to on
-* reference to data embedded in html file
-* preprocessing embedded data before passing it to on
-* preprocessing embedded data before passing it to on
-
-* basic data structure with long names
-* basic data structure with dimensions
-* basic data structure with all column features
+3. Visualization options
+  * standard reference to csv file
+  * preprocessing csv file before passing it to on
+  * reference to data embedded in html file
+  * preprocessing embedded data before passing it to on
 
 ### Format of the csv file
 
