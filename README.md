@@ -49,3 +49,18 @@ Dimension can be specified when certain items have a different meaning hence bel
 .
 
 ### 2. Including data
+
+When a csv file with data in the right format exists, the typical call of item explorer looks as follows:
+
+```javascript
+    var myIEChart = itemExplorerChart("items.csv");
+    showChart(myIEChart.myData()); 
+        
+    function showChart(_file) {
+      d3.select("body")
+        .append("div")
+        .attr("class", "chart")
+        .datum(_file)
+        .call(myIEChart);
+    }  
+```
