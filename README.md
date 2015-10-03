@@ -1,6 +1,6 @@
 # item-explorer
 Exploring item combinations with a bar chart.
-Supports column features.
+Item explorer follows the [d3.js reusable charts pattern](http://bost.ocks.org/mike/chart/) to let you customize the chart.
 
 ### Examples
 
@@ -26,7 +26,7 @@ Complete list of examples:
   * reference to data embedded in html file
   * preprocessing embedded data before passing it to on
 
-### Format of the csv file
+### 1. Data formatting
 
 The file must be a comma separated file with the first row containing the attribute names.
 The attribute refering to the frequency has to be preceded with a `_`(*underscore*).
@@ -48,3 +48,4 @@ Example for first line of csv file with column features:
 Dimension can be specified when certain items have a different meaning hence belonging to a different dimension. Different dimensions are drawn in separate bar charts and sorted separately
 .
 
+### 2. Including data
