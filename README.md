@@ -3,11 +3,11 @@ Exploring item combinations with a bar chart.
 Supports column features.
 
 
-## Format of the csv file
+### Format of the csv file
 
-The file must a comma separated file with the first row containing the attribute names.
-The attribute refering to the frequency has to be preceded with a "_"(underscore).
-The name following the underscore is displayed for the y axis.
+The file must be a comma separated file with the first row containing the attribute names.
+The attribute refering to the frequency has to be preceded with a `_`(*underscore*).
+The name following the underscore is displayed for the y axis. Note that the attribute names must be distinct, otherwise an error occurs.
 
 ###Column features
 
@@ -15,9 +15,6 @@ Features can be added in the first line of the csv file to the attributes.
 Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon)
 Example for first line of csv file with column features:
 `_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3`
-
-Note that the attribute names must be distinct, otherwise an error occurs.
-
 
 #####Supported column features:
 
