@@ -7,7 +7,7 @@ Supports column features.
 
 The file must be a comma separated file with the first row containing the attribute names.
 The attribute refering to the frequency has to be preceded with a `_`(*underscore*).
-The name following the underscore is displayed for the y axis. Note that the attribute names must be distinct, otherwise an error occurs.
+The name following the *underscore is displayed as the label for the y axis. Note that the attribute names must be distinct, otherwise an error occurs.
 
 ###Column features
 
