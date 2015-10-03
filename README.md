@@ -22,8 +22,9 @@ Example for first line of csv file with column features:
 
 <h5>Supported column features:</h5>
 
-- sfsda<code>CO=</code> for specifying a color in rgb. E.g: <code>CO=rgb(70 130 180)</code>. <br>Color can be used to denote certain items belonging together.
- -<code>LN=</code> for specifying a long name of an item. E.g: <code>LN=myLongItemName</code>
- -<code>DI=</code> for specifying a dimension. E.g: <code>DI=fruits</code>. <br>Dimension can be specified when certain items have a different meaning hence belonging to a different dimension. Different dimensions are drawn in separate bar charts.
+- <code>CO=</code> for specifying a color in rgb. E.g: <code>CO=rgb(70 130 180)</code>. <br>Color can be used to denote certain items belonging together.
+- <code>LN=</code> for specifying a long name of an item. E.g: <code>LN=myLongItemName</code>
+- <code>DI=</code> for specifying a dimension. E.g: <code>DI=fruits</code>. 
+<br>Dimension can be specified when certain items have a different meaning hence belonging to a different dimension. Different dimensions are drawn in separate bar charts.
 <br>Note that the attribute names must be distinct, otherwise an error occurs.
 </p>
