@@ -28,6 +28,7 @@ Other examples are:
 List of Examples:
 
 Data formatting:
+---------------
 * basic data structure
 * basic data structure with added colors
 * basic data structure with long names
@@ -35,6 +36,7 @@ Data formatting:
 * basic data structure with all column features
 
 Including data
+--------------
 * standard reference to csv file
 * preprocessing csv file before passing it to on
 * reference to data embedded in html file
