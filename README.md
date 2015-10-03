@@ -7,7 +7,7 @@ Supports column features.
 One example is here.
 Complete list of examples:
 
-1. Data formatting:
+1. Data formatting
   * basic data structure
   * basic data structure with added colors
   * basic data structure with long names
