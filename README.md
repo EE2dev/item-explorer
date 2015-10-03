@@ -9,10 +9,11 @@ The file must be a comma separated file with the first row containing the attrib
 The attribute refering to the frequency has to be preceded with a `_`(*underscore*).
 The name following the *underscore* is displayed as the label for the y axis. Note that the attribute names must be distinct, otherwise an error occurs.
 
-###Column features
+####Column features
 
-Features can be added in the first line of the csv file to the attributes.
-Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon)
+Features can be added to the attributes in the first line of the csv file.
+Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon).
+
 Example for first line of csv file with column features:
 `_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3`
 
