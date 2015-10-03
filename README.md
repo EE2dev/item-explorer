@@ -7,6 +7,7 @@ Supports column features.
 
 <h3>Format of the csv file</h3>
 <p>
+The file must a comma separated file with the first row containing the attribute names.
 The attribute with the frequency has to be preceded with a "_"(underscore).
 The name following the underscore is displayed for the y axis.
 </p>
