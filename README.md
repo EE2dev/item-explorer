@@ -64,3 +64,10 @@ When a csv file with data in the right format exists, the typical call of item e
         .call(myIEChart);
     }  
 ```
+
+### 3. Visualization options
+
+function | explanation
+------------ | -------------
+`myData` | contains the data to be visualized
+`barWidth` | sets the width of one bar in pixels. Default is 38.
