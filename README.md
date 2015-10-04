@@ -70,4 +70,4 @@ When a csv file with data in the right format exists, the typical call of item e
 function | explanation
 ------------ | -------------
 `myData` | contains the data to be visualized
-`barWidth` | sets the width of one bar in pixels. Default is 38.
+`barWidth` | sets the width of one bar in pixels. The default is 38px.
