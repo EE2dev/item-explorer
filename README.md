@@ -37,9 +37,6 @@ The name following the *underscore* is displayed as the label for the y axis. No
 Features can be added to the attributes in the first line of the csv file.
 Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon).
 
-Example for first line of csv file with column features:
-`_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3`
-
 #####Supported column features:
 
 - `CO=` for specifying a color in rgb. E.g: `CO=rgb(70 130 180)`. Color can be used to denote certain items belonging together.
@@ -47,6 +44,15 @@ Example for first line of csv file with column features:
 - `DI=` for specifying a dimension. E.g: `DI=fruits`. 
 Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately
 .
+
+Example for first line of csv file with column features:
+```
+_customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
+1378,1,0,0,0
+6352,0,1,0,0
+435,1,1,1,0
+...
+```
 
 ### 2. Including data
 
