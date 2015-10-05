@@ -15,10 +15,10 @@ Complete list of examples:
   * basic data structure with all column features
 
 2. Including data
-  * standard reference to csv file
-  * preprocessing csv file before passing it to on
-  * reference to data embedded in html file
-  * preprocessing embedded data before passing it to on
+  * [standard reference to csv file](http://bl.ocks.org/ee2dev/3bb8a779948659a5b101)
+  * [reference to data embedded in html file](http://bl.ocks.org/ee2dev/07bbe91f368e5ce0b180)
+  * [preprocessing csv file before passing it to on](http://bl.ocks.org/ee2dev/a5e1b098533228613f28)
+  * [preprocessing embedded data before passing it to on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
 
 3. Visualization options
   * standard reference to csv file
