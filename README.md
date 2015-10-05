@@ -61,13 +61,12 @@ When a csv file with data in the right format exists, the typical call of item e
 
 ```javascript
     var myIEChart = itemExplorerChart("items.csv");
-    showChart(myIEChart.myData()); 
-        
-    function showChart(_file) {
+    showChart(); 
+    
+    function showChart() {
       d3.select("body")
         .append("div")
         .attr("class", "chart")
-        .datum(_file)
         .call(myIEChart);
     }  
 ```
