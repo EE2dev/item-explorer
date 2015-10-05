@@ -46,7 +46,7 @@ Multiple features per attribute are possible. Features are specified after the c
 Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately
 .
 
-Example for first line of csv file with column features:
+Example for the first line of the csv file with column features:
 ```
 _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 1378,1,0,0,0
