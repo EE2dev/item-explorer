@@ -61,25 +61,25 @@ var itemExplorerChart = function(_myData) {
     
     // 0.1 functions for external access
     function IEChart(selection) {
-      if (createHTMLFrame) {
-        buildHTMLFrame();
-      }
-      console.log("_myData "+ _myData);
-      if (typeof _myData !== 'undefined') {
-        readData(_myData, selection);
-      } 
-      else {
-        readData("<pre>", selection);
-      }
+      selection.each( function (d) {
+        if (createHTMLFrame) {
+          buildHTMLFrame();
+        }
+        console.log(d);
+        console.log("_myData "+ _myData);
+        if (typeof d !== 'undefined') { // data processing from outside
+          createChart(selection, d);
+        }
+        else { // data processing here
+          if (typeof _myData !== 'undefined') { 
+            readData(_myData, selection);
+          } 
+          else {
+            readData("<pre>", selection);
+          }
+        }
+      });
     }
-    
-    IEChart.myData = function (_myData) {
-      if (!arguments.length) {
-        return file;
-      }
-      file = _myData;
-      return IEChart;      
-    };
 
     IEChart.barWidth = function (_barWidth) {
       if (!arguments.length) {
@@ -149,6 +149,8 @@ var itemExplorerChart = function(_myData) {
         file.forEach( function (row) {
           convertToNumber(row);
         });
+        console.log("hier");
+        console.log(file);
         createChart(selection, file);
       }
     } 
@@ -421,7 +423,6 @@ var itemExplorerChart = function(_myData) {
           d3.selectAll(".tooltip").remove();
         })
         .on("click", function(d) {
-          console.log("Clicked on: "+d.index + " " +d.item);
           d3.selectAll(".tooltip").remove();
           if (d3.event.altKey) {
             updateAlternativeSelection(d.item);
