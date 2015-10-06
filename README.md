@@ -17,8 +17,8 @@ Complete list of examples:
 2. Including data
   * [standard reference to csv file](http://bl.ocks.org/ee2dev/3bb8a779948659a5b101)
   * [reference to data embedded in html file](http://bl.ocks.org/ee2dev/07bbe91f368e5ce0b180)
-  * [preprocessing csv file before passing it to on](http://bl.ocks.org/ee2dev/a5e1b098533228613f28)
-  * [preprocessing embedded data before passing it to on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
+  * [preprocessing csv file before passing it on](http://bl.ocks.org/ee2dev/a5e1b098533228613f28)
+  * [preprocessing embedded data before passing it on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
 
 3. Visualization options
   * standard reference to csv file
@@ -46,7 +46,7 @@ Multiple features per attribute are possible. Features are specified after the c
 Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately
 .
 
-Example for the first line of the csv file with column features:
+Example for a csv file with column features:
 ```
 _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 1378,1,0,0,0
@@ -57,7 +57,7 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 
 ### 2. Including data
 
-When a csv file with data in the right format exists, the typical call of item explorer looks as follows:
+When a csv file with data in the correct format exists, the typical call of item explorer looks as follows:
 
 ```javascript
     var myIEChart = itemExplorerChart("items.csv");
