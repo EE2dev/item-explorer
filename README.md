@@ -36,7 +36,7 @@ All other rows contain a comma separated list of the frequency and `0`'s or `1`'
 ####Column features
 
 Features can be added to the attributes in the first line of the csv file.
-Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon).
+Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a `:`(colon).
 
 #####Supported column features:
 
