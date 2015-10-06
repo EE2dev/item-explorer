@@ -1,5 +1,5 @@
 # item-explorer
-Exploring item combinations with a bar chart.
+Exploring combinatorial questions with a bar chart. There are many applications with combinatorial questions such as discovering interesting and frequent combinations of items bought in a store (market basket analysis) or exploring what web pages do users visit on a certain web site.
 Item explorer follows the [d3.js reusable charts pattern](http://bost.ocks.org/mike/chart/) to let you customize the chart.
 
 ### Examples
