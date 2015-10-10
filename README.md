@@ -1,5 +1,5 @@
 # item-explorer
-Exploring item combinations with a bar chart.
+Exploring combinatorial questions with a bar chart. There are many applications with combinatorial questions such as discovering frequent combinations of items bought in a store (market basket analysis) or exploring what web pages do users visit on a certain web site.
 Item explorer follows the [d3.js reusable charts pattern](http://bost.ocks.org/mike/chart/) to let you customize the chart.
 
 ### Examples
@@ -15,10 +15,10 @@ Complete list of examples:
   * basic data structure with all column features
 
 2. Including data
-  * standard reference to csv file
-  * preprocessing csv file before passing it to on
-  * reference to data embedded in html file
-  * preprocessing embedded data before passing it to on
+  * [standard reference to csv file](http://bl.ocks.org/ee2dev/3bb8a779948659a5b101)
+  * [reference to data embedded in html file](http://bl.ocks.org/ee2dev/07bbe91f368e5ce0b180)
+  * [preprocessing csv file before passing it on](http://bl.ocks.org/ee2dev/a5e1b098533228613f28)
+  * [preprocessing embedded data before passing it on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
 
 3. Visualization options
   * standard reference to csv file
@@ -36,7 +36,7 @@ All other rows contain a comma separated list of the frequency and `0`'s or `1`'
 ####Column features
 
 Features can be added to the attributes in the first line of the csv file.
-Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a ":"(colon).
+Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a `:`(colon).
 
 #####Supported column features:
 
@@ -46,7 +46,7 @@ Multiple features per attribute are possible. Features are specified after the c
 Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately
 .
 
-Example for the first line of the csv file with column features:
+Example for a csv file with column features:
 ```
 _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 1378,1,0,0,0
@@ -57,7 +57,7 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 
 ### 2. Including data
 
-When a csv file with data in the right format exists, the typical call of item explorer looks as follows:
+When a csv file with data in the correct format exists, the typical call of item explorer looks as follows:
 
 ```javascript
     var myIEChart = itemExplorerChart("items.csv");
