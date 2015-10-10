@@ -276,7 +276,7 @@ var itemExplorerChart = function(_myData) {
             _itemObject.itemLong = _token.slice(3);
             break;
           case "DI=":
-            _itemObject.group = _token.slice(3);
+            _itemObject.group = _token.slice(3).replace(/\s+/g, "_");
             break;  
         }
       });
@@ -380,7 +380,7 @@ var itemExplorerChart = function(_myData) {
         .attr("y", 25 + 3)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
-        .text(groupProperties.selector.split("g.group")[1]);
+        .text(groupProperties.selector.split("g.group")[1].replace("_", " "));
 
       bars.append("rect")
         .attr("class", "bar drawn")
@@ -495,6 +495,13 @@ var itemExplorerChart = function(_myData) {
               xShift = d3.select(this).select("g.x.axis").node().getBBox().width +
                        d3.select(this).select("g.y.axis").node().getBBox().width;
               xTrans += xShift + gap;
+              if (i === 0) {
+                if (d3.select(this).select("g.y.axis").node().getBBox().width > padding.left) {
+                  padding.left = d3.select(this).select("g.y.axis").node().getBBox().width;
+                  d3.select("svg.IEChart g.padding")
+                    .attr("transform", "translate(" + padding.left + ", " + padding.top + ")"); 
+                }
+              }
               // 3 steps to change height
               // 1 xTrans += this.getBBox().height + gap;
               var transString = "translate("+ trans + ", 0)"; 
@@ -616,7 +623,6 @@ var itemExplorerChart = function(_myData) {
     // 2.5 helper function: callback for when all transitions are finished, called at the end of function 2.2 render(reselectData, group)
     function endAll (transition, callback) {
       var n;
-
       if (transition.empty()) {
           callback();
       }
