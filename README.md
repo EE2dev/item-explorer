@@ -4,15 +4,16 @@ Item explorer follows the [d3.js reusable charts pattern](http://bost.ocks.org/m
 
 ### Examples
 
-One example is here.
+The main example is here.
+
 Complete list of examples:
 
 1. Data formatting
-  * basic data structure
-  * basic data structure with added colors
-  * basic data structure with long names
-  * basic data structure with dimensions
-  * basic data structure with all column features
+  * [basic data structure](http://bl.ocks.org/ee2dev/5a4ab3ca8b3b7b57d234)
+  * [basic data structure with added colors](http://bl.ocks.org/ee2dev/0f7abbfc6ab01513d89a)
+  * [basic data structure with long names](http://bl.ocks.org/ee2dev/d9ad0499316f09c598a3)
+  * [basic data structure with dimensions](http://bl.ocks.org/ee2dev/2a7a31815153d26b39f6)
+  * [basic data structure with all column features](http://bl.ocks.org/ee2dev/69c42b901d0ed52d480a)
 
 2. Including data
   * [standard reference to csv file](http://bl.ocks.org/ee2dev/3bb8a779948659a5b101)
