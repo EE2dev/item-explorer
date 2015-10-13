@@ -6,9 +6,9 @@
       font: 12px sans-serif;
     }
 		
-		.selection.bar {
-			opacity: 0;
-		}
+    .selection.bar {
+      opacity: 0;
+    }
 		
     .axis {
       font: 10px sans-serif;

@@ -169,10 +169,15 @@
       display:none;
     }
     
-    div.center
-        {
+    div.center {
       width: 850px;
       display: block;
       margin-left: auto;
       margin-right: auto;
     }
+    
+    svg.IEChart {
+      display: block;
+      margin: auto;
+    }
+    
