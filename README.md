@@ -22,7 +22,7 @@ Complete list of examples:
   * [preprocessing embedded data before passing it on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
 
 3. Visualization options
-  * chnaging the tick format
+  * changing the tick format
   * changing the decimal separator
 
 ### 1. Data formatting
