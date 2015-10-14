@@ -4,7 +4,7 @@ Item explorer follows the [d3.js reusable charts pattern](http://bost.ocks.org/m
 
 ### Examples
 
-The main example is here.
+[The main example is here](http://bl.ocks.org/EE2dev/raw/a3ee04578325668bd3f8/).
 
 Complete list of examples:
 
@@ -22,7 +22,7 @@ Complete list of examples:
   * [preprocessing embedded data before passing it on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
 
 3. Visualization options
-  * changing the thousands separator and the tick format
+  * [changing the thousands separator and the tick format](http://bl.ocks.org/EE2dev/raw/131ad62a0ef5a8e6968b/)
 
 ### 1. Data formatting
 
