@@ -72,8 +72,8 @@ When a csv file with data in the correct format exists, the typical call of item
 
 function | explanation
 ------------ | -------------
-`barWidth()` | sets the width of each bar in pixels. The default value is 38px.
-`barHeight()` | sets the maximum height of the bars in pixels. The default value is 340px.
+`barWidth()` | sets the width of each bar in pixels. The default value is 38.
+`barHeight()` | sets the maximum height of the bars in pixels. The default value is 340.
 `thousandsSeparator()` | sets the thousands separator and will be applied to the y axis, the info and exploration panels and the tooltip. The default value is "," (e.g. leading to 1,000) with the decimal separator being ".". The only other choice is "." (e.g. leading to 1.000) leading to the decimal separator ",".
 `tickFormat()` | sets the [tick format](https://github.com/mbostock/d3/wiki/SVG-Axes#tickFormat) for the y axis. The default value is ",.0f".
 `drawGridLines()` | draws the grid lines. The default value is true.
