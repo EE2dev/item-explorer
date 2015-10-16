@@ -41,8 +41,7 @@ Multiple features per attribute are possible. Features are specified after the c
 - `CO=` for specifying a color in rgb. E.g: `CO=rgb(70 130 180)`. Color can be used to denote certain items belonging together.
 - `LN=` for specifying a long name of an item. E.g: `LN=myLongItemName`.
 - `DI=` for specifying a dimension. E.g: `DI=fruits`. 
-Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately
-.
+Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately.
 
 Example for a csv file with column features:
 ```
