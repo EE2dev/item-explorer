@@ -57,6 +57,13 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 When a csv file with data in the correct format exists, the typical call of item explorer looks as follows:
 
 ```javascript
+    ...
+    // include the following three files:
+    <link rel="stylesheet" type="text/css" href="http://www.ankerst.de/lib/itemExplorer_10.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+    <script src="http://www.ankerst.de/lib/itemExplorer_10.min.js"></script>
+    ...
+    // setup a chart with a csv file and add the visualization to a DOM element
     var myIEChart = itemExplorerChart("items.csv");
     showChart(); 
     
