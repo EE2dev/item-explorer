@@ -43,7 +43,7 @@ Multiple features per attribute are possible. Features are specified after the c
 - `DI=` for specifying a dimension. E.g: `DI=fruits`. 
 Dimensions can be specified when certain items have a different meaning hence belonging to different dimensions. Different dimensions are drawn in separate bar charts and sorted separately.
 
-Example for a csv file with column features:
+Example of a csv file with column features:
 ```
 _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 1378,1,0,0,0
