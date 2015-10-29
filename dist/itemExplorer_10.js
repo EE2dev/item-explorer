@@ -23,7 +23,7 @@ var itemExplorerChart = function(_myData) {
     var y;    // y scale
     var yAxis;
     var tickFormat;
-    var thousandsSeparator = ",";
+    var decimalSeparator = ",";
     var gridLines = true;
     var createHTMLFrame = true;
     var localeFormatter = d3.locale({
@@ -97,8 +97,8 @@ var itemExplorerChart = function(_myData) {
       return IEChart;      
     };
     
-    IEChart.thousandsSeparator = function (_thousandsSeparator) {
-      thousandsSeparator = _thousandsSeparator;
+    IEChart.decimalSeparator = function (_decimalSeparator) {
+      decimalSeparator = _decimalSeparator;
       return IEChart;      
     };
 
@@ -172,10 +172,10 @@ var itemExplorerChart = function(_myData) {
         parseFirstColumn(file);
         y = d3.scale.linear().range([myHeight, 0]); 
         
-        if (thousandsSeparator === ",") {
-          yAxis = d3.svg.axis().scale(y).orient("left").ticks(10, tickFormat);
+        if (decimalSeparator === ",") {
+          yAxis = d3.svg.axis().scale(y).orient("left").ticks(10, tickFormat); //.innerTickSize(-width); 
         }
-        else {// thousandsSeparator === "." 
+        else {// decimalSeparator === "." 
           tickFormat = (!tickFormat) ? ",.0f" : tickFormat;
           yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(localeFormatter.numberFormat(tickFormat));
         }
@@ -509,9 +509,16 @@ var itemExplorerChart = function(_myData) {
               d3.selectAll("g.toolTipTrans").filter( function (da) { return da === d;}).attr("transform", transString);
               return transString; 
             });
-          // adjust SVG
+          // adjust SVG - minimum width is 500 to correctly display the help panel
           var svgSel = d3.select("svg.IEChart");
-          svgSel.attr("width", xTrans + padding.left);  
+          var newWidth = xTrans + padding.left;
+          if (newWidth < 500) {
+            newWidth = 500;
+            var transX = margin.left + newWidth/2 - (xTrans + padding.left)/2;           
+            d3.select("svg.IEChart>g")
+              .attr("transform", "translate(" + transX + ", 0)");
+          }  
+          svgSel.attr("width", newWidth);  
           // 3 d3.select("svg.IEChart").attr("height", xTrans + padding.top); 
           // compute borders for efficient check when displaying tooltips
           svgLeft = svgSel.node().getBoundingClientRect().left;
@@ -567,7 +574,7 @@ var itemExplorerChart = function(_myData) {
       
       textSel.append("text")
         .attr("class", "tooltip firstLine")
-        .attr("x", 0)
+        .attr("x", 0) // a11
         .attr("y", topY + 5)
         .attr("dy", ".71em")
         .attr("fill", "black")
@@ -576,7 +583,7 @@ var itemExplorerChart = function(_myData) {
         
       textSel.append("text")
         .attr("class", "tooltip secondLine")
-        .attr("x", 0)
+        .attr("x", 0)  // a12
         .attr("y", topY + 4 + 18)
         .attr("dy", ".71em")
         .attr("fill", "black")
@@ -587,7 +594,7 @@ var itemExplorerChart = function(_myData) {
       var rgbString = d3.selectAll(".bar.drawn").filter( function (da) {return da === d;}).style("fill");
       textBoxSel.insert("rect", ".tooltip.textgroup")
         .attr("class", "tooltip box")
-        .attr("x", -tooltipWidth/2)
+        .attr("x", -tooltipWidth/2) // a12
         .attr("y", topY)
         .attr("width", tooltipWidth)
         .attr("height", tooltipHeight)
@@ -1108,7 +1115,7 @@ var itemExplorerChart = function(_myData) {
         .style("background", "white")
         .style("border", "0px solid darkgrey");
         
-      var mySvg = d3.select("svg.IEChart>g");
+      var mySvg = d3.select("svg.IEChart");
       var rect = mySvg.node().getBoundingClientRect();
       var xPosition = (rect.right - rect.left) / 2 - 200;  
       var yPosition = (rect.bottom - rect.top) / 2 - 100;  
@@ -1166,7 +1173,7 @@ var itemExplorerChart = function(_myData) {
     //11.1. helper for displaying decimal point for frequency and percent with German convention
     function formatNumber(str) {
       var format = d3.format(",.0f");
-      if (thousandsSeparator === ".") { // German convention
+      if (decimalSeparator === ".") { // German convention
         if (+str % 1 !== 0) {
           return str.split(".").join(",");
         }
