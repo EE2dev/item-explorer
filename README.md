@@ -2,6 +2,8 @@
 Exploring combinatorial questions with a bar chart. There are many applications with combinatorial questions such as discovering frequent combinations of items bought in a store (market basket analysis) or exploring what web pages do users visit on a certain web site.
 Item explorer follows the [d3.js reusable charts pattern](http://bost.ocks.org/mike/chart/) to let you customize the chart.
 
+[Here](https://youtu.be/B8a2O6L31_w) is a link to a video explaining how to use item explorer with your own data.
+
 ### Examples
 
 [The main example is here](http://bl.ocks.org/EE2dev/raw/a3ee04578325668bd3f8/).
