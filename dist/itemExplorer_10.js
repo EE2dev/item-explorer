@@ -592,6 +592,10 @@ var itemExplorerChart = function(_myData) {
 
       tooltipWidth = d3.select(".tooltip.textgroup")[0][0].getBBox().width + 6;
       var rgbString = d3.selectAll(".bar.drawn").filter( function (da) {return da === d;}).style("fill");
+      if (rgbString.charAt(0) === "#") { // safari stores colors in hex
+        var hex = rgbString;
+        rgbString = "rgb(" + hexToRgb(hex).r + ", " + hexToRgb(hex).g + ", " + hexToRgb(hex).b + ")";
+      }
       textBoxSel.insert("rect", ".tooltip.textgroup")
         .attr("class", "tooltip box")
         .attr("x", -tooltipWidth/2) // a12
@@ -1215,6 +1219,22 @@ var itemExplorerChart = function(_myData) {
 			    return false;
 			  };
 			};
+    }
+    
+    //11.4 hex to RGB converter (safari stores color in hex)
+    function hexToRgb(hex) {
+      // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+      var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+          return r + r + g + g + b + b;
+      });
+
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+      } : null;
     }
     
     // 12.1 generate HTML frame
