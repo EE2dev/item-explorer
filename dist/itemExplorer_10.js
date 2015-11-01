@@ -23,7 +23,7 @@ var itemExplorerChart = function(_myData) {
     var y;    // y scale
     var yAxis;
     var tickFormat;
-    var decimalSeparator = ",";
+    var thousandsSeparator = ",";
     var gridLines = true;
     var createHTMLFrame = true;
     var localeFormatter = d3.locale({
@@ -97,8 +97,8 @@ var itemExplorerChart = function(_myData) {
       return IEChart;      
     };
     
-    IEChart.decimalSeparator = function (_decimalSeparator) {
-      decimalSeparator = _decimalSeparator;
+    IEChart.thousandsSeparator = function (_thousandsSeparator) {
+      thousandsSeparator = _thousandsSeparator;
       return IEChart;      
     };
 
@@ -172,10 +172,10 @@ var itemExplorerChart = function(_myData) {
         parseFirstColumn(file);
         y = d3.scale.linear().range([myHeight, 0]); 
         
-        if (decimalSeparator === ",") {
-          yAxis = d3.svg.axis().scale(y).orient("left").ticks(10, tickFormat); //.innerTickSize(-width); 
+         if (thousandsSeparator === ",") {
+          yAxis = d3.svg.axis().scale(y).orient("left").ticks(10, tickFormat);
         }
-        else {// decimalSeparator === "." 
+        else {// thousandsSeparator === "." 
           tickFormat = (!tickFormat) ? ",.0f" : tickFormat;
           yAxis = d3.svg.axis().scale(y).orient("left").tickFormat(localeFormatter.numberFormat(tickFormat));
         }
@@ -574,7 +574,7 @@ var itemExplorerChart = function(_myData) {
       
       textSel.append("text")
         .attr("class", "tooltip firstLine")
-        .attr("x", 0) // a11
+        .attr("x", 0)
         .attr("y", topY + 5)
         .attr("dy", ".71em")
         .attr("fill", "black")
@@ -583,7 +583,7 @@ var itemExplorerChart = function(_myData) {
         
       textSel.append("text")
         .attr("class", "tooltip secondLine")
-        .attr("x", 0)  // a12
+        .attr("x", 0)
         .attr("y", topY + 4 + 18)
         .attr("dy", ".71em")
         .attr("fill", "black")
@@ -1177,7 +1177,7 @@ var itemExplorerChart = function(_myData) {
     //11.1. helper for displaying decimal point for frequency and percent with German convention
     function formatNumber(str) {
       var format = d3.format(",.0f");
-      if (decimalSeparator === ".") { // German convention
+      if (thousandsSeparator === ".") { // German convention
         if (+str % 1 !== 0) {
           return str.split(".").join(",");
         }
