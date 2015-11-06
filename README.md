@@ -24,7 +24,7 @@ Complete list of examples:
   * [preprocessing embedded data before passing it on](http://bl.ocks.org/ee2dev/de4a9e0010795ace76b8)
 
 3. Visualization options
-  * [changing the thousands separator and the tick format](http://bl.ocks.org/EE2dev/raw/131ad62a0ef5a8e6968b/)
+  * [changing the thousands separator and the tick format](http://bl.ocks.org/EE2dev/131ad62a0ef5a8e6968b/)
 
 ### 1. Data formatting
 
