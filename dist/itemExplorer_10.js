@@ -1016,14 +1016,22 @@ var itemExplorerChart = function(_myData) {
     
     //8.2. function 2 for computing frequent 2-item set
     function countFrequentItems(row) {
-      var keys = Object.keys(row);
+      var frequencyKey = -1;
+      var keys = Object.keys(row).filter(function(key){
+        if (key.substring(0,1) === "_") {
+          frequencyKey = key;
+          return false;
+        } else {
+          return true;
+        }
+      });
       var keyLength = keys.length;
-
-      for (var i=1; i < keyLength; i++){
+      
+      for (var i=0; i < keyLength; i++){
         if (row[keys[i]] === 1) {
           for (var j=i+1; j < keyLength; j++){
             if (row[keys[j]] === 1) {
-              frequentItemOne[i-1][j-1] += row[keys[0]];
+              frequentItemOne[i][j] += row[frequencyKey];
             } 
           }  
         }
