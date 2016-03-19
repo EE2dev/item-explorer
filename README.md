@@ -56,7 +56,7 @@ _customers,item1:LN=longitem1,item2:LN=longitem2,item3:LN=longitem3,item4
 
 ### 2. Including data
 
-When a csv file with data in the correct format exists, the typical call of item explorer looks as follows:
+If a csv file with data in the correct format exists, the typical call of item explorer looks as follows:
 
 ```javascript
     ...
