@@ -33,12 +33,12 @@ The attribute refering to the frequency has to be preceded with a `_`(*underscor
 The name following the *underscore* is displayed as the label for the y axis. Note that the attribute names must be distinct, otherwise an error occurs.
 All other rows contain a comma separated list of the frequency and `0`'s or `1`'s for each attribute depending on if it applies or not. 
 
-####Column features
+#### Column features
 
 Features can be added to the attributes in the first line of the csv file.
 Multiple features per attribute are possible. Features are specified after the corresponding attribute separated by a `:`(colon).
 
-#####Supported column features:
+##### Supported column features:
 
 - `CO=` for specifying a color in rgb. E.g: `CO=rgb(70 130 180)`. Color can be used to denote certain items belonging together.
 - `LN=` for specifying a long name of an item. E.g: `LN=myLongItemName`.
