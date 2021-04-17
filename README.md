@@ -61,9 +61,9 @@ If a csv file with data in the correct format exists, the typical call of item e
 ```javascript
     ...
     // include the following three files:
-    <link rel="stylesheet" type="text/css" href="http://www.ankerst.de/lib/itemExplorer_10.css">
+    <link rel="stylesheet" type="text/css" href="https://www.ankerst.de/lib/itemExplorer_10.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <script src="http://www.ankerst.de/lib/itemExplorer_10.min.js"></script>
+    <script src="https://www.ankerst.de/lib/itemExplorer_10.min.js"></script>
     ...
     // setup a chart with a csv file and add the visualization to a DOM element
     var myIEChart = itemExplorerChart("items.csv");
